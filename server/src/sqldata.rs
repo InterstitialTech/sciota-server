@@ -25,6 +25,7 @@ pub struct SaveDevice {
 #[derive(Serialize, Debug, Clone)]
 pub struct Sensor {
   id: i64,
+  device: i64,
   name: String,
   description: String,
   createdate: i64,
@@ -367,14 +368,15 @@ pub fn read_sensor(dbfile: &Path, id: i64) -> Result<Sensor, Box<dyn Error>> {
   let conn = Connection::open(dbfile)?;
 
   let rbe = conn.query_row(
-    "SELECT name, description, createdate, changeddate
+    "SELECT device, name, description, createdate, changeddate
       FROM sensor WHERE id = ?1",
     params![id],
     |row| {
       Ok(Sensor {
         id: id,
-        name: row.get(0)?,
-        description: row.get(1)?,
+        device: row.get(0)?,
+        name: row.get(1)?,
+        description: row.get(2)?,
         createdate: row.get(3)?,
         changeddate: row.get(4)?,
       })
@@ -409,17 +411,18 @@ pub fn sensorlisting(
     // check for user on device.
     {
       let mut pstmt = conn.prepare(
-        "SELECT id, name, description, createdate, changeddate
+        "SELECT id, device, name, description, createdate, changeddate
               FROM sensor where device = ?1
               and device in (SELECT id FROM device WHERE user = ?2)",
       )?;
       let rec_iter = pstmt.query_map(params![dev, user], |row| {
         Ok(Sensor {
           id: row.get(0)?,
-          name: row.get(1)?,
-          description: row.get(2)?,
-          createdate: row.get(3)?,
-          changeddate: row.get(4)?,
+          device: row.get(1)?,
+          name: row.get(2)?,
+          description: row.get(3)?,
+          createdate: row.get(4)?,
+          changeddate: row.get(5)?,
         })
       })?;
 
@@ -441,10 +444,11 @@ pub fn sensorlisting(
       let rec_iter = pstmt.query_map(params![user], |row| {
         Ok(Sensor {
           id: row.get(0)?,
-          name: row.get(1)?,
-          description: row.get(2)?,
-          createdate: row.get(3)?,
-          changeddate: row.get(4)?,
+          device: row.get(1)?,
+          name: row.get(2)?,
+          description: row.get(3)?,
+          createdate: row.get(4)?,
+          changeddate: row.get(5)?,
         })
       })?;
 
