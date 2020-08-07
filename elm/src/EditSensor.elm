@@ -19,11 +19,10 @@ import Schelme.Show exposing (showTerm)
 
 
 type Msg
-    = OnDescriptionInput String
-    | OnTitleChanged String
+    = OnDescriptionChanged String
+    | OnNameChanged String
     | SavePress
     | DonePress
-    | DeletePress
 
 
 type alias Model =
@@ -37,8 +36,7 @@ type alias Model =
 type Command
     = None
     | Save Data.SaveSensor
-    | Done
-    | Delete Int
+    | Cancel
 
 
 view : Model -> Element Msg
@@ -47,19 +45,18 @@ view model =
         [ E.width E.fill ]
         [ E.text "Edit Sensor"
         , E.row [ E.width E.fill ]
-            [ EI.button Common.buttonStyle { onPress = Just SavePress, label = E.text "Save" }
-            , EI.button Common.buttonStyle { onPress = Just DonePress, label = E.text "Done" }
-            , EI.button (E.alignRight :: Common.buttonStyle) { onPress = Just DeletePress, label = E.text "Delete" }
+            [ EI.button Common.buttonStyle { onPress = Just SavePress, label = E.text "Ok" }
+            , EI.button Common.buttonStyle { onPress = Just DonePress, label = E.text "Cancel" }
             ]
         , EI.text []
-            { onChange = OnTitleChanged
+            { onChange = OnNameChanged
             , text = model.name
             , placeholder = Nothing
             , label = EI.labelLeft [] (E.text "name")
             }
         , E.row [ E.width E.fill ]
             [ EI.multiline [ E.width (E.px 400) ]
-                { onChange = OnDescriptionInput
+                { onChange = OnDescriptionChanged
                 , text = model.description
                 , placeholder = Nothing
                 , label = EI.labelHidden "Markdown input"
@@ -106,20 +103,12 @@ update msg model =
             )
 
         DonePress ->
-            ( model, Done )
+            ( model, Cancel )
 
-        DeletePress ->
-            case model.id of
-                Just id ->
-                    ( model, Delete id )
-
-                Nothing ->
-                    ( model, None )
-
-        OnTitleChanged t ->
+        OnNameChanged t ->
             ( { model | name = t }, None )
 
-        OnDescriptionInput d ->
+        OnDescriptionChanged d ->
             ( { model
                 | description = d
               }

@@ -240,18 +240,18 @@ pub fn save_device(
     None => {
       println!("adding device: {}", savedevice.name);
       conn.execute(
-        "INSERT INTO device (name, description, createdate, changeddate)
-         VALUES (?1, ?2, ?3, ?4)",
-        params![savedevice.name, savedevice.description, now, now],
+        "INSERT INTO device (name, user, description, createdate, changeddate)
+         VALUES (?1, ?2, ?3, ?4, ?5)",
+        params![savedevice.name, uid, savedevice.description, now, now],
       )?;
 
       let deviceid = conn.last_insert_rowid();
 
-      conn.execute(
-        "INSERT INTO devicemember (device, user)
-         VALUES (?1, ?2)",
-        params![deviceid, uid],
-      )?;
+      // conn.execute(
+      //   "INSERT INTO devicemember (device, user)
+      //    VALUES (?1, ?2)",
+      //   params![deviceid, uid],
+      // )?;
 
       Ok(deviceid)
     }
@@ -298,7 +298,7 @@ pub fn devicelisting(dbfile: &Path, user: i64) -> rusqlite::Result<Vec<Device>> 
   let mut pstmt = conn.prepare(
     "SELECT id, name, description, user, createdate, changeddate
       FROM device
-      where devic.user = ?1",
+      where device.user = ?1",
   )?;
 
   let rec_iter = pstmt.query_map(params![user], |row| {

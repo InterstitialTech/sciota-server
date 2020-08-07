@@ -4,7 +4,6 @@ use std::path::PathBuf;
 pub struct Config {
   pub ip: String,
   pub port: u16,
-  pub createdirs: bool,
   pub db: PathBuf,
   pub mainsite: String,
   pub appname: String,

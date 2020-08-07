@@ -1,8 +1,9 @@
-module EditDevice exposing (Command(..), Model, Msg(..), initFull, initNew, setId, update, view)
+module EditDevice exposing (Command(..), Model, Msg(..), init, initNew, setId, update, view)
 
 import Common
 import Data
 import Dict exposing (Dict)
+import EditSensorListing as ESL
 import Element as E exposing (Element)
 import Element.Background as EBk
 import Element.Border as EBd
@@ -18,6 +19,30 @@ import Markdown.Renderer
 import Schelme.Show exposing (showTerm)
 
 
+
+{-
+
+   ( EditSensorListingMsg em, EditSensorListing es login ) ->
+       let
+           ( emod, ecmd ) =
+               EditSensorListing.update em es
+       in
+       case ecmd of
+           EditSensorListing.New ->
+               ( { model | state = EditSensor (EditSensor.initNew emod.device) login }, Cmd.none )
+
+           EditSensorListing.Selected s ->
+               ( { model
+                   | state = EditSensor (EditSensor.init emod.device s) login
+                 }
+               , Cmd.none
+               )
+
+
+
+-}
+
+
 type Msg
     = OnMarkdownInput String
     | OnNameChanged String
@@ -25,12 +50,14 @@ type Msg
     | DonePress
     | DeletePress
     | ViewPress
+    | ESLMsg ESL.Msg
 
 
 type alias Model =
     { id : Maybe Int
     , name : String
     , md : String
+    , esl : ESL.Model
     }
 
 
@@ -67,14 +94,17 @@ view model =
                 , spellcheck = False
                 }
             ]
+        , E.text "sensors"
+        , E.map ESLMsg (ESL.view model.esl)
         ]
 
 
-initFull : Data.Device -> Model
-initFull zk =
-    { id = Just zk.id
-    , name = zk.name
-    , md = zk.description
+init : Data.Device -> List Data.Sensor -> Model
+init device sensors =
+    { id = Just device.id
+    , name = device.name
+    , md = device.description
+    , esl = ESL.init sensors
     }
 
 
@@ -83,6 +113,7 @@ initNew =
     { id = Nothing
     , name = ""
     , md = ""
+    , esl = ESL.initNew
     }
 
 
@@ -132,3 +163,10 @@ update msg model =
               }
             , None
             )
+
+        ESLMsg emsg ->
+            let
+                ( emod, ecmd ) =
+                    ESL.update emsg model.esl
+            in
+            ( { model | esl = emod }, None )

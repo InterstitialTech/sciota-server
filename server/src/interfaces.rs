@@ -148,30 +148,38 @@ fn user_interface_loggedin(
       what: "logged in".to_string(),
       content: serde_json::Value::Null, // return api token that expires?
     }),
-    /*    "savezk" => {
-      let msgdata = Option::ok_or(msg.data.as_ref(), "malformed json data")?;
-      let sz: sqldata::SaveZk = serde_json::from_value(msgdata.clone())?;
-
-      let zkid = sqldata::save_zk(&config.db.as_path(), uid, &sz)?;
+    "getdevicelisting" => {
+      let entries = sqldata::devicelisting(Path::new(&config.db), uid)?;
       Ok(ServerResponse {
-        what: "savedzk".to_string(),
-        content: serde_json::to_value(zkid)?,
+        what: "devicelisting".to_string(),
+        content: serde_json::to_value(entries)?,
       })
     }
+    "savedevice" => {
+      let msgdata = Option::ok_or(msg.data.as_ref(), "malformed json data")?;
+      let sz: sqldata::SaveDevice = serde_json::from_value(msgdata.clone())?;
+
+      let deviceid = sqldata::save_device(&config.db.as_path(), uid, &sz)?;
+      Ok(ServerResponse {
+        what: "saveddevice".to_string(),
+        content: serde_json::to_value(deviceid)?,
+      })
+    }
+    "getsensorlisting" => {
+      let msgdata = Option::ok_or(msg.data.as_ref(), "malformed json data")?;
+      let deviceid: i64 = serde_json::from_value(msgdata.clone())?;
+
+      let entries = sqldata::sensorlisting(Path::new(&config.db), uid, Some(deviceid))?;
+      Ok(ServerResponse {
+        what: "sensorlisting".to_string(),
+        content: serde_json::to_value(entries)?, // return api token that expires?
+      })
+    }
+    /*
     "getzklisting" => {
       let entries = sqldata::zklisting(Path::new(&config.db), uid)?;
       Ok(ServerResponse {
         what: "zklisting".to_string(),
-        content: serde_json::to_value(entries)?, // return api token that expires?
-      })
-    }
-    "getzknotelisting" => {
-      let msgdata = Option::ok_or(msg.data.as_ref(), "malformed json data")?;
-      let zkid: i64 = serde_json::from_value(msgdata.clone())?;
-
-      let entries = sqldata::zknotelisting(Path::new(&config.db), uid, zkid)?;
-      Ok(ServerResponse {
-        what: "zknotelisting".to_string(),
         content: serde_json::to_value(entries)?, // return api token that expires?
       })
     }

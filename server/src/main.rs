@@ -150,7 +150,6 @@ fn defcon() -> Config {
   Config {
     ip: "127.0.0.1".to_string(),
     port: 8000,
-    createdirs: false,
     db: PathBuf::from("./mahbloag.db"),
     mainsite: "https:://mahbloag.practica.site/".to_string(),
     appname: "mahbloag".to_string(),

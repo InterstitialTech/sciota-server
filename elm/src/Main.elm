@@ -12,7 +12,6 @@ import Dict exposing (Dict)
 import EditDevice
 import EditDeviceListing
 import EditSensor
-import EditSensorListing
 import Element exposing (Element)
 import Element.Background as EBk
 import Element.Border as EBd
@@ -42,7 +41,7 @@ type Msg
     | EditDeviceMsg EditDevice.Msg
     | EditDeviceListingMsg EditDeviceListing.Msg
     | EditSensorMsg EditSensor.Msg
-    | EditSensorListingMsg EditSensorListing.Msg
+      -- | EditSensorListingMsg EditSensorListing.Msg
     | ShowMessageMsg ShowMessage.Msg
     | UserReplyData (Result Http.Error UI.ServerResponse)
       -- | PublicReplyData (Result Http.Error PI.ServerResponse)
@@ -52,7 +51,7 @@ type Msg
 
 
 type WaitMode
-    = WmDevice Data.Device
+    = WmDevice Data.Device (Data.Device -> List Data.Sensor -> State)
 
 
 
@@ -65,11 +64,11 @@ type State
     | EditDevice EditDevice.Model Data.Login
     | EditDeviceListing EditDeviceListing.Model Data.Login
     | EditSensor EditSensor.Model Data.Login
-    | EditSensorListing EditSensorListing.Model Data.Login
+      -- | EditSensorListing EditSensorListing.Model Data.Login
     | BadError BadError.Model State
     | ShowMessage ShowMessage.Model Data.Login
     | PubShowMessage ShowMessage.Model
-    | DeviceWait State WaitMode
+    | Wait State WaitMode
 
 
 type alias Flags =
@@ -106,9 +105,8 @@ stateLogin state =
         EditSensor _ login ->
             Just login
 
-        EditSensorListing _ login ->
-            Just login
-
+        -- EditSensorListing _ login ->
+        --     Just login
         BadError _ bestate ->
             stateLogin bestate
 
@@ -118,7 +116,7 @@ stateLogin state =
         PubShowMessage _ ->
             Nothing
 
-        DeviceWait bwstate _ ->
+        Wait bwstate _ ->
             stateLogin bwstate
 
 
@@ -134,9 +132,8 @@ viewState size state =
         EditSensor em _ ->
             Element.map EditSensorMsg <| EditSensor.view em
 
-        EditSensorListing em _ ->
-            Element.map EditSensorListingMsg <| EditSensorListing.view em
-
+        -- EditSensorListing em _ ->
+        --     Element.map EditSensorListingMsg <| EditSensorListing.view em
         ShowMessage em _ ->
             Element.map ShowMessageMsg <| ShowMessage.view em
 
@@ -149,7 +146,7 @@ viewState size state =
         BadError em _ ->
             Element.map BadErrorMsg <| BadError.view em
 
-        DeviceWait innerState _ ->
+        Wait innerState _ ->
             Element.map (\_ -> Noop) (viewState size innerState)
 
 
@@ -306,10 +303,12 @@ update msg model =
 
                         UI.SensorListing l ->
                             case state of
-                                DeviceWait zwstate wm ->
+                                Wait zwstate wm ->
                                     case ( wm, stateLogin zwstate ) of
-                                        ( WmDevice device, Just login ) ->
-                                            ( { model | state = EditSensorListing { device = device, sensors = l } login }, Cmd.none )
+                                        ( WmDevice device statefn, Just login ) ->
+                                            ( { model | state = statefn device l }
+                                            , Cmd.none
+                                            )
 
                                         -- ( WmDevicel Nothing mbzkn zk tostate, Just login ) ->
                                         --     case mbzkn of
@@ -318,7 +317,7 @@ update msg model =
                                         --             , Cmd.none
                                         --             )
                                         --         Nothing ->
-                                        --             ( { model | state = DeviceWait zwstate (WmDevicelm (Just l) mbzkn zk tostate) }, Cmd.none )
+                                        --             ( { model | state = Wait zwstate (WmDevicelm (Just l) mbzkn zk tostate) }, Cmd.none )
                                         _ ->
                                             ( { model | state = BadError (BadError.initialModel "unexpected reply") state }
                                             , Cmd.none
@@ -337,9 +336,9 @@ update msg model =
                                     , Cmd.none
                                     )
 
-                                DeviceWait bwstate mode ->
+                                Wait bwstate mode ->
                                     case mode of
-                                        WmDevice zk ->
+                                        WmDevice _ _ ->
                                             ( { model | state = BadError (BadError.initialModel "can't edit - no zklist!") state }, Cmd.none )
 
                                 -- WmDevicel sensors device ->
@@ -461,36 +460,39 @@ update msg model =
                 EditSensor.None ->
                     ( { model | state = EditSensor emod login }, Cmd.none )
 
-                EditSensor.Done ->
+                EditSensor.Cancel ->
                     ( { model
                         | state =
-                            DeviceWait
+                            Wait
                                 (ShowMessage
-                                    { message = "loading articles"
+                                    { message = "loading device"
                                     }
                                     login
                                 )
-                                (WmDevice emod.device)
+                                (WmDevice emod.device
+                                    (\device listing ->
+                                        EditDevice (EditDevice.init device listing) login
+                                    )
+                                )
                       }
                     , sendUIMsg model.location
                         login
                         (UI.GetSensorListing <| Just es.device.id)
                     )
 
-                EditSensor.Delete id ->
-                    -- issue delete and go back to listing.
-                    ( { model
-                        | state =
-                            ShowMessage
-                                { message = "loading articles"
-                                }
-                                login
-                      }
-                    , sendUIMsg model.location
-                        login
-                        (UI.DeleteDevice id)
-                    )
-
+        -- EditSensor.Delete id ->
+        --     -- issue delete and go back to listing.
+        --     ( { model
+        --         | state =
+        --             ShowMessage
+        --                 { message = "loading articles"
+        --                 }
+        --                 login
+        --       }
+        --     , sendUIMsg model.location
+        --         login
+        --         (UI.DeleteDevice id)
+        --     )
         ( EditDeviceListingMsg em, EditDeviceListing es login ) ->
             let
                 ( emod, ecmd ) =
@@ -500,23 +502,24 @@ update msg model =
                 EditDeviceListing.New ->
                     ( { model | state = EditDevice EditDevice.initNew login }, Cmd.none )
 
-                EditDeviceListing.Selected zk ->
-                    ( { model | state = EditDevice (EditDevice.initFull zk) login }, Cmd.none )
-
-        ( EditSensorListingMsg em, EditSensorListing es login ) ->
-            let
-                ( emod, ecmd ) =
-                    EditSensorListing.update em es
-            in
-            case ecmd of
-                EditSensorListing.New ->
-                    ( { model | state = EditSensor (EditSensor.initNew emod.device) login }, Cmd.none )
-
-                EditSensorListing.Selected s ->
+                EditDeviceListing.Selected device ->
                     ( { model
-                        | state = EditSensor (EditSensor.init emod.device s) login
+                        | state =
+                            Wait
+                                (ShowMessage
+                                    { message = "loading device"
+                                    }
+                                    login
+                                )
+                                (WmDevice device
+                                    (\d listing ->
+                                        EditDevice (EditDevice.init d listing) login
+                                    )
+                                )
                       }
-                    , Cmd.none
+                    , sendUIMsg model.location
+                        login
+                        (UI.GetSensorListing <| Just device.id)
                     )
 
         ( BadErrorMsg bm, BadError bs prevstate ) ->

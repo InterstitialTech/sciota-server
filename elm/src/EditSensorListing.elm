@@ -2,6 +2,7 @@ module EditSensorListing exposing (..)
 
 import Common
 import Data
+import EditSensor as ES
 import Element as E exposing (Element)
 import Element.Background as EBk
 import Element.Border as EBd
@@ -17,8 +18,8 @@ type Msg
 
 
 type alias Model =
-    { device : Data.Device
-    , sensors : List Data.Sensor
+    { sensors : List Data.Sensor
+    , edit : Maybe ES.Model
     }
 
 
@@ -27,12 +28,25 @@ type Command
     | New
 
 
+initNew : Model
+initNew =
+    { sensors = []
+    , edit = Nothing
+    }
+
+
+init : List Data.Sensor -> Model
+init sensors =
+    { sensors = sensors
+    , edit = Nothing
+    }
+
+
 view : Model -> Element Msg
 view model =
     E.column [ E.spacing 8, E.padding 8 ] <|
         E.row [ E.spacing 20 ]
-            [ E.text model.device.name
-            , E.text "Select a sensor"
+            [ E.text "Select a sensor"
             , EI.button Common.buttonStyle { onPress = Just NewPress, label = E.text "new" }
             ]
             :: List.map
