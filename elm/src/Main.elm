@@ -63,7 +63,7 @@ type State
     = Login Login.Model
     | EditDevice EditDevice.Model Data.Login
     | EditDeviceListing EditDeviceListing.Model Data.Login
-    | EditSensor EditSensor.Model Data.Login
+    | EditSensor EditSensor.Model Data.Login (Maybe Data.Sensor -> State)
       -- | EditSensorListing EditSensorListing.Model Data.Login
     | BadError BadError.Model State
     | ShowMessage ShowMessage.Model Data.Login
@@ -102,7 +102,7 @@ stateLogin state =
         EditDeviceListing _ login ->
             Just login
 
-        EditSensor _ login ->
+        EditSensor _ login _ ->
             Just login
 
         -- EditSensorListing _ login ->
@@ -129,7 +129,7 @@ viewState size state =
         EditDeviceListing em _ ->
             Element.map EditDeviceListingMsg <| EditDeviceListing.view em
 
-        EditSensor em _ ->
+        EditSensor em _ _ ->
             Element.map EditSensorMsg <| EditSensor.view em
 
         -- EditSensorListing em _ ->
@@ -369,10 +369,12 @@ update msg model =
                                 _ ->
                                     ( { model | state = BadError (BadError.initialModel "unexpected message") state }, Cmd.none )
 
-                        UI.SensorSaved beid ->
+                        UI.SensorSaved sensor ->
                             case state of
-                                EditSensor emod login ->
-                                    ( { model | state = EditSensor (EditSensor.setId emod beid) login }, Cmd.none )
+                                EditSensor emod login tostate ->
+                                    ( { model | state = tostate (Just sensor) }
+                                    , Cmd.none
+                                    )
 
                                 _ ->
                                     ( { model | state = BadError (BadError.initialModel "unexpected blog message") state }, Cmd.none )
@@ -444,55 +446,69 @@ update msg model =
                     , Cmd.none
                     )
 
-        ( EditSensorMsg em, EditSensor es login ) ->
+                EditDevice.NewSensor deviceid ->
+                    let
+                        _ =
+                            Debug.log "newsensors" ""
+                    in
+                    ( { model
+                        | state =
+                            EditSensor
+                                (EditSensor.initNew deviceid)
+                                login
+                                (\mbsensor ->
+                                    case mbsensor of
+                                        Just sensor ->
+                                            EditDevice (EditDevice.setSensor sensor es) login
+
+                                        Nothing ->
+                                            EditDevice es login
+                                )
+                      }
+                    , Cmd.none
+                    )
+
+                EditDevice.EditSensor sensor ->
+                    ( { model
+                        | state =
+                            EditSensor
+                                (EditSensor.init sensor)
+                                login
+                                (\mbsensor ->
+                                    case mbsensor of
+                                        Just s ->
+                                            EditDevice (EditDevice.setSensor s es) login
+
+                                        Nothing ->
+                                            EditDevice es login
+                                )
+                      }
+                    , Cmd.none
+                    )
+
+        ( EditSensorMsg em, EditSensor es login esstate ) ->
             let
                 ( emod, ecmd ) =
                     EditSensor.update em es
             in
             case ecmd of
                 EditSensor.Save zk ->
-                    ( { model | state = EditSensor emod login }
+                    ( { model | state = EditSensor emod login esstate }
                     , sendUIMsg model.location
                         login
                         (UI.SaveSensor zk)
                     )
 
                 EditSensor.None ->
-                    ( { model | state = EditSensor emod login }, Cmd.none )
+                    ( { model | state = EditSensor emod login esstate }, Cmd.none )
 
                 EditSensor.Cancel ->
                     ( { model
-                        | state =
-                            Wait
-                                (ShowMessage
-                                    { message = "loading device"
-                                    }
-                                    login
-                                )
-                                (WmDevice emod.device
-                                    (\device listing ->
-                                        EditDevice (EditDevice.init device listing) login
-                                    )
-                                )
+                        | state = esstate Nothing
                       }
-                    , sendUIMsg model.location
-                        login
-                        (UI.GetSensorListing <| Just es.device.id)
+                    , Cmd.none
                     )
 
-        -- EditSensor.Delete id ->
-        --     -- issue delete and go back to listing.
-        --     ( { model
-        --         | state =
-        --             ShowMessage
-        --                 { message = "loading articles"
-        --                 }
-        --                 login
-        --       }
-        --     , sendUIMsg model.location
-        --         login
-        --         (UI.DeleteDevice id)
-        --     )
         ( EditDeviceListingMsg em, EditDeviceListing es login ) ->
             let
                 ( emod, ecmd ) =

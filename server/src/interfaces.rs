@@ -175,54 +175,55 @@ fn user_interface_loggedin(
         content: serde_json::to_value(entries)?, // return api token that expires?
       })
     }
+    "savesensor" => {
+      let msgdata = Option::ok_or(msg.data.as_ref(), "malformed json data")?;
+      let sbe: sqldata::SaveSensor = serde_json::from_value(msgdata.clone())?;
+
+      let s = sqldata::save_sensor(&config.db.as_path(), uid, &sbe)?;
+      Ok(ServerResponse {
+        what: "savedsensor".to_string(),
+        content: serde_json::to_value(s)?,
+      })
+    }
     /*
-    "getzklisting" => {
-      let entries = sqldata::zklisting(Path::new(&config.db), uid)?;
-      Ok(ServerResponse {
-        what: "zklisting".to_string(),
-        content: serde_json::to_value(entries)?, // return api token that expires?
-      })
-    }
-    "getzk" => {
-      let msgdata = Option::ok_or(msg.data.as_ref(), "malformed json data")?;
-      let id: i64 = serde_json::from_value(msgdata.clone())?;
+        "getzklisting" => {
+          let entries = sqldata::zklisting(Path::new(&config.db), uid)?;
+          Ok(ServerResponse {
+            what: "zklisting".to_string(),
+            content: serde_json::to_value(entries)?, // return api token that expires?
+          })
+        }
+        "getzk" => {
+          let msgdata = Option::ok_or(msg.data.as_ref(), "malformed json data")?;
+          let id: i64 = serde_json::from_value(msgdata.clone())?;
 
-      let zk = sqldata::read_zk(Path::new(&config.db), id)?;
-      Ok(ServerResponse {
-        what: "zk".to_string(),
-        content: serde_json::to_value(zk)?,
-      })
-    }
-    "getzknote" => {
-      let msgdata = Option::ok_or(msg.data.as_ref(), "malformed json data")?;
-      let id: i64 = serde_json::from_value(msgdata.clone())?;
+          let zk = sqldata::read_zk(Path::new(&config.db), id)?;
+          Ok(ServerResponse {
+            what: "zk".to_string(),
+            content: serde_json::to_value(zk)?,
+          })
+        }
+        "getzknote" => {
+          let msgdata = Option::ok_or(msg.data.as_ref(), "malformed json data")?;
+          let id: i64 = serde_json::from_value(msgdata.clone())?;
 
-      let note = sqldata::read_zknote(Path::new(&config.db), id)?;
-      Ok(ServerResponse {
-        what: "zknote".to_string(),
-        content: serde_json::to_value(note)?,
-      })
-    }
-    "deletezknote" => {
-      let msgdata = Option::ok_or(msg.data.as_ref(), "malformed json data")?;
-      let id: i64 = serde_json::from_value(msgdata.clone())?;
+          let note = sqldata::read_zknote(Path::new(&config.db), id)?;
+          Ok(ServerResponse {
+            what: "zknote".to_string(),
+            content: serde_json::to_value(note)?,
+          })
+        }
+        "deletezknote" => {
+          let msgdata = Option::ok_or(msg.data.as_ref(), "malformed json data")?;
+          let id: i64 = serde_json::from_value(msgdata.clone())?;
 
-      sqldata::delete_zknote(Path::new(&config.db), uid, id)?;
-      Ok(ServerResponse {
-        what: "deletedzknote".to_string(),
-        content: serde_json::to_value(id)?,
-      })
-    }
-    "savezknote" => {
-      let msgdata = Option::ok_or(msg.data.as_ref(), "malformed json data")?;
-      let sbe: sqldata::SaveZkNote = serde_json::from_value(msgdata.clone())?;
-
-      let beid = sqldata::save_zknote(&config.db.as_path(), uid, &sbe)?;
-      Ok(ServerResponse {
-        what: "savedzknote".to_string(),
-        content: serde_json::to_value(beid)?,
-      })
-    }*/
+          sqldata::delete_zknote(Path::new(&config.db), uid, id)?;
+          Ok(ServerResponse {
+            what: "deletedzknote".to_string(),
+            content: serde_json::to_value(id)?,
+          })
+        }
+    */
     wat => Err(Box::new(simple_error::SimpleError::new(format!(
       "invalid 'what' code:'{}'",
       wat

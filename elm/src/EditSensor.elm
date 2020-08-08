@@ -27,7 +27,7 @@ type Msg
 
 type alias Model =
     { id : Maybe Int
-    , device : Data.Device
+    , deviceid : Int
     , name : String
     , description : String
     }
@@ -66,19 +66,19 @@ view model =
         ]
 
 
-init : Data.Device -> Data.Sensor -> Model
-init device sensor =
+init : Data.Sensor -> Model
+init sensor =
     { id = Just sensor.id
-    , device = device
+    , deviceid = sensor.device
     , name = sensor.name
     , description = sensor.description
     }
 
 
-initNew : Data.Device -> Model
-initNew device =
+initNew : Int -> Model
+initNew deviceid =
     { id = Nothing
-    , device = device
+    , deviceid = deviceid
     , name = ""
     , description = ""
     }
@@ -96,7 +96,7 @@ update msg model =
             ( model
             , Save
                 { id = model.id
-                , device = model.device.id
+                , device = model.deviceid
                 , name = model.name
                 , description = model.description
                 }

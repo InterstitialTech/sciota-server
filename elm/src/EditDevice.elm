@@ -1,4 +1,4 @@
-module EditDevice exposing (Command(..), Model, Msg(..), init, initNew, setId, update, view)
+module EditDevice exposing (Command(..), Model, Msg(..), init, initNew, setId, setSensor, update, view)
 
 import Common
 import Data
@@ -67,6 +67,8 @@ type Command
     | Done
     | View Data.SaveDevice
     | Delete Int
+    | EditSensor Data.Sensor
+    | NewSensor Int
 
 
 view : Model -> Element Msg
@@ -122,6 +124,14 @@ setId model beid =
     { model | id = Just beid }
 
 
+setSensor : Data.Sensor -> Model -> Model
+setSensor sensor model =
+    { model
+        | esl =
+            ESL.setSensor sensor model.esl
+    }
+
+
 update : Msg -> Model -> ( Model, Command )
 update msg model =
     case msg of
@@ -169,4 +179,14 @@ update msg model =
                 ( emod, ecmd ) =
                     ESL.update emsg model.esl
             in
-            ( { model | esl = emod }, None )
+            case ecmd of
+                ESL.New ->
+                    case model.id of
+                        Just id ->
+                            ( { model | esl = emod }, NewSensor id )
+
+                        Nothing ->
+                            ( { model | esl = emod }, None )
+
+                ESL.Selected s ->
+                    ( { model | esl = emod }, EditSensor s )

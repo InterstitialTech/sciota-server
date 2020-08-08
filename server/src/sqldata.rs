@@ -35,6 +35,7 @@ pub struct Sensor {
 #[derive(Deserialize, Debug, Clone)]
 pub struct SaveSensor {
   id: Option<i64>,
+  device: i64,
   name: String,
   description: String,
 }
@@ -329,17 +330,12 @@ pub fn devicelisting(dbfile: &Path, user: i64) -> rusqlite::Result<Vec<Device>> 
 // --------------------------------------------------------------------------------------
 // sensor CRUD
 
-pub fn save_sensor(
-  dbfile: &Path,
-  uid: i64,
-  device: i64,
-  sensor: &SaveSensor,
-) -> Result<i64, Box<dyn Error>> {
+pub fn save_sensor(dbfile: &Path, uid: i64, sensor: &SaveSensor) -> Result<Sensor, Box<dyn Error>> {
   let conn = Connection::open(dbfile)?;
 
   let now = now()?;
 
-  // TODO ensure user auth here.
+  // TODO ensure user auth here. does user own the device?
 
   match sensor.id {
     Some(id) => {
@@ -349,17 +345,31 @@ pub fn save_sensor(
          WHERE id = ?4",
         params![sensor.name, sensor.description, now, sensor.id],
       )?;
-      Ok(id)
+      Ok(Sensor {
+        id: id,
+        device: sensor.device.clone(),
+        name: sensor.name.clone(),
+        description: sensor.description.clone(),
+        createdate: now, // TODO: actual createdate
+        changeddate: now,
+      })
     }
     None => {
       println!("adding sensor: {}", sensor.name);
       conn.execute(
-        "INSERT INTO sensor (name, description, createdate, changeddate)
+        "INSERT INTO sensor (name, device, description, createdate, changeddate)
          VALUES (?1, ?2, ?3, ?4, ?5)",
-        params![sensor.name, sensor.description, now, now],
+        params![sensor.name, sensor.device, sensor.description, now, now],
       )?;
 
-      Ok(conn.last_insert_rowid())
+      Ok(Sensor {
+        id: conn.last_insert_rowid(),
+        device: sensor.device.clone(),
+        name: sensor.name.clone(),
+        description: sensor.description.clone(),
+        createdate: now,
+        changeddate: now,
+      })
     }
   }
 }

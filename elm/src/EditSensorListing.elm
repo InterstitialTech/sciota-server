@@ -10,6 +10,7 @@ import Element.Font as Font
 import Element.Input as EI
 import Element.Region
 import TangoColors as TC
+import Util
 
 
 type Msg
@@ -40,6 +41,21 @@ init sensors =
     { sensors = sensors
     , edit = Nothing
     }
+
+
+setSensor : Data.Sensor -> Model -> Model
+setSensor sensor model =
+    -- if theres a sensor in the list with this id, replace it.
+    let
+        ( l, r ) =
+            Util.splitAt (\s -> s.id == sensor.id) model.sensors
+    in
+    case r of
+        [] ->
+            { model | sensors = sensor :: model.sensors }
+
+        a :: b ->
+            { model | sensors = l ++ sensor :: b }
 
 
 view : Model -> Element Msg

@@ -32,7 +32,7 @@ type ServerResponse
     | DeviceDeleted Int
     | SensorListing (List Data.Sensor)
     | Sensor Data.Sensor
-    | SensorSaved Int
+    | SensorSaved Data.Sensor
     | SensorDeleted Int
     | MeasurementListing (List Data.Measurement)
     | Measurement Data.Measurement
@@ -180,7 +180,7 @@ serverResponseDecoder =
                     JD.map DeviceDeleted (JD.at [ "content" ] <| JD.int)
 
                 "savedsensor" ->
-                    JD.map SensorSaved (JD.at [ "content" ] <| JD.int)
+                    JD.map SensorSaved (JD.at [ "content" ] <| Data.decodeSensor)
 
                 "deletedsensor" ->
                     JD.map SensorDeleted (JD.at [ "content" ] <| JD.int)
