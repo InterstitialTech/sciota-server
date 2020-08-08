@@ -185,6 +185,15 @@ fn user_interface_loggedin(
         content: serde_json::to_value(s)?,
       })
     }
+    "savemeasurement" => {
+      let msgdata = Option::ok_or(msg.data.as_ref(), "malformed json data")?;
+      let m: sqldata::SaveMeasurement = serde_json::from_value(msgdata.clone())?;
+      let s = sqldata::add_measurement(&config.db.as_path(), uid, &m)?;
+      Ok(ServerResponse {
+        what: "savedmeasurement".to_string(),
+        content: serde_json::to_value(s)?,
+      })
+    }
     /*
         "getzklisting" => {
           let entries = sqldata::zklisting(Path::new(&config.db), uid)?;

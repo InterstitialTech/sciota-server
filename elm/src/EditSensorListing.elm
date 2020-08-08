@@ -70,7 +70,6 @@ view model =
                     E.row [ E.spacing 8 ]
                         [ E.text e.name
                         , EI.button Common.buttonStyle { onPress = Just (SelectPress e), label = E.text "edit" }
-                        , E.link [ Font.color TC.darkBlue, Font.underline ] { url = "blog/" ++ String.fromInt e.id, label = E.text "link" }
                         ]
                 )
                 model.sensors

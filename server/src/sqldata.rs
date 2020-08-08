@@ -49,7 +49,7 @@ pub struct Measurement {
   measuredate: i64,
 }
 
-#[derive(Serialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct SaveMeasurement {
   value: f64,
   sensor: i64,
