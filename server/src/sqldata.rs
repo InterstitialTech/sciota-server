@@ -111,11 +111,10 @@ pub fn dbinit(dbfile: &Path) -> rusqlite::Result<()> {
   conn.execute(
     "CREATE TABLE measurement (
                 id            INTEGER NOT NULL PRIMARY KEY,
-                sensor        INTEGER NOT NULL
-                value 				REAL NOT NULL,
+                sensor        INTEGER NOT NULL,
+                value         REAL NOT NULL,
                 measuredate   INTEGER NOT NULL,
-                createdate    INTEGER NOT NULL,
-                FOREIGN KEY(user) REFERENCES user(id)
+                createdate    INTEGER NOT NULL
                 )",
     params![],
   )?;

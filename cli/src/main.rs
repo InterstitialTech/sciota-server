@@ -54,7 +54,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
   let client = reqwest::Client::new();
   let res = client
     .post("http://localhost:8002/user")
-    .body(serde_json::to_string(&um)?)
+    .json(&um)
     .send()
     .await?;
 
