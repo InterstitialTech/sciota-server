@@ -15,6 +15,7 @@ import Util
 
 type Msg
     = SelectPress Data.Sensor
+    | ViewPress Data.Sensor
     | NewPress
 
 
@@ -25,7 +26,8 @@ type alias Model =
 
 
 type Command
-    = Selected Data.Sensor
+    = Edit Data.Sensor
+    | ViewMeasurements Data.Sensor
     | New
 
 
@@ -72,6 +74,7 @@ view model =
                         , E.text " - "
                         , E.text e.name
                         , EI.button Common.buttonStyle { onPress = Just (SelectPress e), label = E.text "edit" }
+                        , EI.button Common.buttonStyle { onPress = Just (ViewPress e), label = E.text "view" }
                         ]
                 )
                 model.sensors
@@ -82,7 +85,12 @@ update msg model =
     case msg of
         SelectPress s ->
             ( model
-            , Selected s
+            , Edit s
+            )
+
+        ViewPress s ->
+            ( model
+            , ViewMeasurements s
             )
 
         NewPress ->

@@ -33,6 +33,7 @@ import Url exposing (Url)
 import Url.Parser as UP exposing ((</>))
 import UserInterface as UI
 import Util
+import ViewMeasurements
 
 
 type Msg
@@ -41,6 +42,7 @@ type Msg
     | EditDeviceMsg EditDevice.Msg
     | EditDeviceListingMsg EditDeviceListing.Msg
     | EditSensorMsg EditSensor.Msg
+    | ViewMeasurementsMsg ViewMeasurements.Msg
       -- | EditSensorListingMsg EditSensorListing.Msg
     | ShowMessageMsg ShowMessage.Msg
     | UserReplyData (Result Http.Error UI.ServerResponse)
@@ -52,6 +54,7 @@ type Msg
 
 type WaitMode
     = WmDevice Data.Device (Data.Device -> List Data.Sensor -> State)
+    | WmMeasurements (List Data.Measurement -> State)
 
 
 
@@ -68,6 +71,7 @@ type State
     | BadError BadError.Model State
     | ShowMessage ShowMessage.Model Data.Login
     | PubShowMessage ShowMessage.Model
+    | ViewMeasurements ViewMeasurements.Model State
     | Wait State WaitMode
 
 
@@ -105,6 +109,9 @@ stateLogin state =
         EditSensor _ login _ ->
             Just login
 
+        ViewMeasurements _ s ->
+            stateLogin s
+
         -- EditSensorListing _ login ->
         --     Just login
         BadError _ bestate ->
@@ -131,6 +138,9 @@ viewState size state =
 
         EditSensor em _ _ ->
             Element.map EditSensorMsg <| EditSensor.view em
+
+        ViewMeasurements m _ ->
+            Element.map ViewMeasurementsMsg <| ViewMeasurements.view m
 
         -- EditSensorListing em _ ->
         --     Element.map EditSensorListingMsg <| EditSensorListing.view em
@@ -341,6 +351,9 @@ update msg model =
                                         WmDevice _ _ ->
                                             ( { model | state = BadError (BadError.initialModel "can't edit - no zklist!") state }, Cmd.none )
 
+                                        WmMeasurements _ ->
+                                            ( { model | state = BadError (BadError.initialModel "unexpected sensor record!") state }, Cmd.none )
+
                                 -- WmDevicel sensors device ->
                                 --     case stateLogin state of
                                 --         Just login ->
@@ -484,6 +497,36 @@ update msg model =
                                 )
                       }
                     , Cmd.none
+                    )
+
+                EditDevice.ViewSensorMeasurements sensor ->
+                    ( { model
+                        | state =
+                            Wait
+                                (ShowMessage
+                                    { message = "loading articles"
+                                    }
+                                    login
+                                )
+                                (WmMeasurements
+                                    (\measurements ->
+                                        ViewMeasurements
+                                            { id = sensor.id
+                                            , name = sensor.name
+                                            , values = measurements
+                                            }
+                                            model.state
+                                    )
+                                )
+                      }
+                    , sendUIMsg model.location
+                        login
+                        (UI.GetMeasurementListing
+                            { sensor = sensor.id
+                            , enddate = Nothing
+                            , lengthOfTime = Nothing
+                            }
+                        )
                     )
 
         ( EditSensorMsg em, EditSensor es login esstate ) ->

@@ -68,6 +68,7 @@ type Command
     | View Data.SaveDevice
     | Delete Int
     | EditSensor Data.Sensor
+    | ViewSensorMeasurements Data.Sensor
     | NewSensor Int
 
 
@@ -188,5 +189,8 @@ update msg model =
                         Nothing ->
                             ( { model | esl = emod }, None )
 
-                ESL.Selected s ->
+                ESL.Edit s ->
                     ( { model | esl = emod }, EditSensor s )
+
+                ESL.ViewMeasurements s ->
+                    ( { model | esl = emod }, ViewSensorMeasurements s )
