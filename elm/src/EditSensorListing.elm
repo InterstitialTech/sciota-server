@@ -68,7 +68,9 @@ view model =
             :: List.map
                 (\e ->
                     E.row [ E.spacing 8 ]
-                        [ E.text e.name
+                        [ E.row [ Font.bold ] [ E.text <| String.fromInt e.id ]
+                        , E.text " - "
+                        , E.text e.name
                         , EI.button Common.buttonStyle { onPress = Just (SelectPress e), label = E.text "edit" }
                         ]
                 )
