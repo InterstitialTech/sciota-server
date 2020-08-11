@@ -3,7 +3,7 @@ let
 in
   with nixpkgs;
   stdenv.mkDerivation {
-    name = "pdfq-env";
+    name = "measurelog-env";
     buildInputs = [ 
       cargo
       rustc
