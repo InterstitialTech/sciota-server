@@ -194,6 +194,16 @@ fn user_interface_loggedin(
         content: serde_json::to_value(s)?,
       })
     }
+    "getmeasurementlisting" => {
+      let msgdata = Option::ok_or(msg.data.as_ref(), "malformed json data")?;
+      let mq: sqldata::MeasurementQuery = serde_json::from_value(msgdata.clone())?;
+
+      let entries = sqldata::measurement_listing(Path::new(&config.db), uid, mq.sensor)?;
+      Ok(ServerResponse {
+        what: "measurementlisting".to_string(),
+        content: serde_json::to_value(entries)?, // return api token that expires?
+      })
+    }
     /*
         "getzklisting" => {
           let entries = sqldata::zklisting(Path::new(&config.db), uid)?;

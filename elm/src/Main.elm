@@ -296,7 +296,17 @@ update msg model =
                             ( model, Cmd.none )
 
                         UI.MeasurementListing l ->
-                            ( model, Cmd.none )
+                            case model.state of
+                                Wait st (WmMeasurements sfn) ->
+                                    ( { model | state = sfn l }, Cmd.none )
+
+                                _ ->
+                                    ( { model
+                                        | state =
+                                            BadError (BadError.initialModel "was expecting measurements!") state
+                                      }
+                                    , Cmd.none
+                                    )
 
                         UI.Measurement m ->
                             ( model, Cmd.none )
@@ -548,6 +558,22 @@ update msg model =
                 EditSensor.Cancel ->
                     ( { model
                         | state = esstate Nothing
+                      }
+                    , Cmd.none
+                    )
+
+        ( ViewMeasurementsMsg em, ViewMeasurements es esstate ) ->
+            let
+                ( emod, ecmd ) =
+                    ViewMeasurements.update em es
+            in
+            case ecmd of
+                ViewMeasurements.None ->
+                    ( { model | state = ViewMeasurements emod esstate }, Cmd.none )
+
+                ViewMeasurements.Done ->
+                    ( { model
+                        | state = esstate
                       }
                     , Cmd.none
                     )

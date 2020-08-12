@@ -88,7 +88,7 @@ encodeMeasurementQuery : MeasurementQuery -> JE.Value
 encodeMeasurementQuery query =
     JE.object
         (List.filterMap identity
-            [ Just ( "device", JE.int query.sensor )
+            [ Just ( "sensor", JE.int query.sensor )
             , Maybe.map
                 (\ed ->
                     ( "enddate", JE.int ed )

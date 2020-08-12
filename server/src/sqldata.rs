@@ -56,6 +56,13 @@ pub struct SaveMeasurement {
   measuredate: i64,
 }
 
+#[derive(Deserialize, Debug, Clone)]
+pub struct MeasurementQuery {
+  pub sensor: i64,
+  enddate: Option<i64>,
+  lengthOfTime: Option<i64>,
+}
+
 #[derive(Deserialize, Serialize, Debug)]
 pub struct User {
   pub id: i64,
