@@ -470,10 +470,6 @@ update msg model =
                     )
 
                 EditDevice.NewSensor deviceid ->
-                    let
-                        _ =
-                            Debug.log "newsensors" ""
-                    in
                     ( { model
                         | state =
                             EditSensor
@@ -623,9 +619,6 @@ update msg model =
 init : Flags -> Url -> Browser.Navigation.Key -> ( Model, Cmd Msg )
 init flags url key =
     let
-        _ =
-            Debug.log "parsed: " (parseUrl url)
-
         seed =
             initialSeed (flags.seed + 7)
 
@@ -682,10 +675,6 @@ routeState location seed route =
 
 urlRequest : Browser.UrlRequest -> Msg
 urlRequest ur =
-    let
-        _ =
-            Debug.log "ur: " ur
-    in
     case ur of
         Browser.Internal url ->
             InternalUrl url
@@ -702,13 +691,7 @@ main =
         , update = update
         , subscriptions = \model -> Sub.none
         , onUrlRequest = urlRequest
-        , onUrlChange =
-            \uc ->
-                let
-                    _ =
-                        Debug.log "uc: " uc
-                in
-                Noop
+        , onUrlChange = \uc -> Noop
 
         -- Url -> msg
         }
