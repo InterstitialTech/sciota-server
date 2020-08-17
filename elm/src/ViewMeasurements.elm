@@ -16,6 +16,7 @@ import Markdown.Html
 import Markdown.Parser
 import Markdown.Renderer
 import Schelme.Show exposing (showTerm)
+import Time
 
 
 type Msg
@@ -43,9 +44,17 @@ view model =
         , E.row [ E.width E.fill ]
             [ EI.button Common.buttonStyle { onPress = Just DonePress, label = E.text "Done" }
             ]
-        , E.row [ Font.bold, Font.size 50 ] [ E.text "values" ]
+        , E.row [ Font.bold, Font.size 50 ] [ E.text "value" ]
         ]
-            ++ List.map (\m -> E.text (String.fromFloat m.value)) model.values
+            ++ List.map
+                (\m ->
+                    E.row [ E.spacing 8 ]
+                        [ E.text (String.fromFloat m.value)
+                        , Common.dateElt Time.utc <| Time.millisToPosix m.measuredate
+                        , Common.dateElt Time.utc <| Time.millisToPosix m.createdate
+                        ]
+                )
+                model.values
 
 
 init : Data.Sensor -> List Data.Measurement -> Model
