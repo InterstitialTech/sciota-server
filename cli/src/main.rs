@@ -9,6 +9,10 @@ use serde_json::Value;
 use std::collections::HashMap;
 use std::time::SystemTime;
 use std::convert::TryInto;
+use std::fs::File;
+use std::io::Read;
+use std::io::Write;
+use std::path::Path;
 
 //  ./target/debug/cli "http://localhost:8002/user" 1 5.1
 
@@ -27,13 +31,20 @@ pub struct SaveMeasurement {
   measuredate: i64,
 }
 
-pub fn now() -> Result<i64, Box<dyn  std::error::Error>> {
+pub fn now() -> Result<i64, Box<dyn std::error::Error>> {
   let nowsecs = SystemTime::now()
     .duration_since(SystemTime::UNIX_EPOCH)
     .map(|n| n.as_secs())?;
   let s: i64 = nowsecs.try_into()?;
   Ok(s * 1000)
 }
+
+pub fn write_string(file_name: &str, text: &str) -> Result<usize, Box<dyn std::error::Error>> {
+  let path = &Path::new(&file_name);
+  let mut inf = File::create(path)?;
+  Ok(inf.write(text.as_bytes())?)
+}
+
 
 use reqwest::Error;
 #[tokio::main]
@@ -69,6 +80,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     what: "savemeasurement".to_string(),
     data: Some(serde_json::to_value(sm)?),
   };
+
+  write_string("message.txt", serde_json::to_string_pretty(&um)?.as_str())?;
 
   // "http://localhost:8002/user"
   
