@@ -34,9 +34,9 @@ pub struct SaveMeasurement {
 pub fn now() -> Result<i64, Box<dyn std::error::Error>> {
   let nowsecs = SystemTime::now()
     .duration_since(SystemTime::UNIX_EPOCH)
-    .map(|n| n.as_secs())?;
+    .map(|n| n.as_millis())?;
   let s: i64 = nowsecs.try_into()?;
-  Ok(s * 1000)
+  Ok(s)
 }
 
 pub fn write_string(file_name: &str, text: &str) -> Result<usize, Box<dyn std::error::Error>> {
@@ -81,7 +81,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     data: Some(serde_json::to_value(sm)?),
   };
 
-  write_string("message.txt", serde_json::to_string_pretty(&um)?.as_str())?;
+  write_string("message.txt", serde_json::to_string(&um)?.as_str())?;
+
+  write_string("message-pretty.txt", serde_json::to_string_pretty(&um)?.as_str())?;
 
   // "http://localhost:8002/user"
   

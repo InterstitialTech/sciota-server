@@ -132,9 +132,9 @@ pub fn dbinit(dbfile: &Path) -> rusqlite::Result<()> {
 pub fn now() -> Result<i64, Box<dyn Error>> {
   let nowsecs = SystemTime::now()
     .duration_since(SystemTime::UNIX_EPOCH)
-    .map(|n| n.as_secs())?;
+    .map(|n| n.as_millis())?;
   let s: i64 = nowsecs.try_into()?;
-  Ok(s * 1000)
+  Ok(s)
 }
 
 // --------------------------------------------------------------------------------------
