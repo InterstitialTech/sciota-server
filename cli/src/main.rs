@@ -4,7 +4,7 @@ extern crate serde_derive;
 extern crate clap;
 
 use clap::{Arg, App, SubCommand};
-
+use reqwest;
 use serde_json::Value;
 use std::collections::HashMap;
 use std::time::SystemTime;
@@ -46,7 +46,6 @@ pub fn write_string(file_name: &str, text: &str) -> Result<usize, Box<dyn std::e
 }
 
 
-use reqwest::Error;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
@@ -85,8 +84,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
   write_string("message-pretty.txt", serde_json::to_string_pretty(&um)?.as_str())?;
 
-  // "http://localhost:8002/user"
-  
   let client = reqwest::Client::new();
   let res = client
     .post(matches.value_of("server").ok_or("wat")?)

@@ -45,6 +45,13 @@ type alias SaveSensor =
     }
 
 
+type alias SaveMeasurement =
+    { value : Float
+    , sensor : Int
+    , measuredate : Int
+    }
+
+
 type alias Measurement =
     { id : Int
     , sensor : Int
@@ -82,6 +89,15 @@ encodeSaveSensor sensor =
                , ( "name", JE.string sensor.name )
                , ( "description", JE.string sensor.description )
                ]
+
+
+encodeSaveMeasurement : SaveMeasurement -> JE.Value
+encodeSaveMeasurement m =
+    JE.object
+        [ ( "sensor", JE.int m.sensor )
+        , ( "value", JE.float m.value )
+        , ( "measuredate", JE.int m.measuredate )
+        ]
 
 
 encodeMeasurementQuery : MeasurementQuery -> JE.Value

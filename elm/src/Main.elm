@@ -405,13 +405,9 @@ update msg model =
                         UI.SensorDeleted beid ->
                             ( model, Cmd.none )
 
-                        -- case state of
-                        --     ShowMessage _ login ->
-                        --         ( model
-                        --         , sendUIMsg model.location login UI.GetSensorListing
-                        --         )
-                        --     _ ->
-                        --         ( { model | state = BadError (BadError.initialModel "unexpected message") state }, Cmd.none )
+                        UI.MeasurementSaved id ->
+                            ( model, Cmd.none )
+
                         UI.UserExists ->
                             ( { model | state = BadError (BadError.initialModel "Can't register - User exists already!") state }, Cmd.none )
 
@@ -556,6 +552,18 @@ update msg model =
                         | state = esstate Nothing
                       }
                     , Cmd.none
+                    )
+
+                EditSensor.AddMeasurement id value ->
+                    ( model
+                    , sendUIMsg model.location
+                        login
+                        (UI.SaveMeasurement
+                            { sensor = id
+                            , value = value
+                            , measuredate = 0
+                            }
+                        )
                     )
 
         ( ViewMeasurementsMsg em, ViewMeasurements es esstate ) ->

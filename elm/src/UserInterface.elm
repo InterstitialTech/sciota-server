@@ -17,6 +17,7 @@ type SendMsg
     | SaveSensor Data.SaveSensor
     | DeleteSensor Int
     | GetMeasurementListing Data.MeasurementQuery
+    | SaveMeasurement Data.SaveMeasurement
 
 
 type ServerResponse
@@ -36,6 +37,7 @@ type ServerResponse
     | SensorDeleted Int
     | MeasurementListing (List Data.Measurement)
     | Measurement Data.Measurement
+    | MeasurementSaved Int
 
 
 encodeSendMsg : SendMsg -> String -> String -> JE.Value
@@ -117,6 +119,14 @@ encodeSendMsg sm uid pwd =
                 , ( "data", Data.encodeSaveSensor sensor )
                 ]
 
+        SaveMeasurement m ->
+            JE.object
+                [ ( "what", JE.string "savemeasurement" )
+                , ( "uid", JE.string uid )
+                , ( "pwd", JE.string pwd )
+                , ( "data", Data.encodeSaveMeasurement m )
+                ]
+
         DeleteSensor id ->
             JE.object
                 [ ( "what", JE.string "deletesensor" )
@@ -187,6 +197,9 @@ serverResponseDecoder =
 
                 "measurement" ->
                     JD.map Measurement (JD.at [ "content" ] <| Data.decodeMeasurement)
+
+                "savedmeasurement" ->
+                    JD.map MeasurementSaved (JD.at [ "content" ] <| JD.int)
 
                 wat ->
                     JD.succeed

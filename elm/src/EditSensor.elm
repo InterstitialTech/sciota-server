@@ -6,7 +6,7 @@ import Dict exposing (Dict)
 import Element as E exposing (Element)
 import Element.Background as EBk
 import Element.Border as EBd
-import Element.Font as Font
+import Element.Font as EF
 import Element.Input as EI
 import Element.Region as ER
 import Html exposing (Attribute, Html)
@@ -16,11 +16,14 @@ import Markdown.Html
 import Markdown.Parser
 import Markdown.Renderer
 import Schelme.Show exposing (showTerm)
+import TangoColors as TC
 
 
 type Msg
     = OnDescriptionChanged String
     | OnNameChanged String
+    | OnValueChanged String
+    | AddPress
     | SavePress
     | DonePress
 
@@ -30,12 +33,15 @@ type alias Model =
     , deviceid : Int
     , name : String
     , description : String
+    , value : String
+    , valuef : Maybe Float
     }
 
 
 type Command
     = None
     | Save Data.SaveSensor
+    | AddMeasurement Int Float
     | Cancel
 
 
@@ -63,6 +69,26 @@ view model =
                 , spellcheck = False
                 }
             ]
+        , case model.id of
+            Just id ->
+                E.row []
+                    [ EI.text
+                        (if String.toFloat model.value == model.valuef then
+                            [ EF.color TC.red ]
+
+                         else
+                            []
+                        )
+                        { onChange = OnValueChanged
+                        , text = model.value
+                        , placeholder = Nothing
+                        , label = EI.labelLeft [] (E.text "measurement")
+                        }
+                    , EI.button Common.buttonStyle { onPress = Just AddPress, label = E.text "Add" }
+                    ]
+
+            Nothing ->
+                E.none
         ]
 
 
@@ -72,6 +98,8 @@ init sensor =
     , deviceid = sensor.device
     , name = sensor.name
     , description = sensor.description
+    , value = ""
+    , valuef = Nothing
     }
 
 
@@ -81,6 +109,8 @@ initNew deviceid =
     , deviceid = deviceid
     , name = ""
     , description = ""
+    , value = ""
+    , valuef = Nothing
     }
 
 
@@ -114,3 +144,19 @@ update msg model =
               }
             , None
             )
+
+        OnValueChanged v ->
+            ( { model
+                | value = v
+                , valuef = String.toFloat v
+              }
+            , None
+            )
+
+        AddPress ->
+            case Debug.log "addpress" ( model.id, model.valuef ) of
+                ( Just id, Just v ) ->
+                    ( model, AddMeasurement id v )
+
+                _ ->
+                    ( model, None )
