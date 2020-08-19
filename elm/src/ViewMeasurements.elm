@@ -44,17 +44,24 @@ view model =
         , E.row [ E.width E.fill ]
             [ EI.button Common.buttonStyle { onPress = Just DonePress, label = E.text "Done" }
             ]
-        , E.row [ Font.bold, Font.size 50 ] [ E.text "value" ]
+        , E.table [ E.spacing 8 ]
+            { data = model.values
+            , columns =
+                [ { header = E.text "value"
+                  , width = E.shrink
+                  , view = \m -> E.text (String.fromFloat m.value)
+                  }
+                , { header = E.text "measured"
+                  , width = E.shrink
+                  , view = \m -> Common.dateElt Time.utc <| Time.millisToPosix m.measuredate
+                  }
+                , { header = E.text "created"
+                  , width = E.shrink
+                  , view = \m -> Common.dateElt Time.utc <| Time.millisToPosix m.createdate
+                  }
+                ]
+            }
         ]
-            ++ List.map
-                (\m ->
-                    E.row [ E.spacing 8 ]
-                        [ E.text (String.fromFloat m.value)
-                        , Common.dateElt Time.utc <| Time.millisToPosix <| Debug.log "measuermentd" m.measuredate
-                        , Common.dateElt Time.utc <| Time.millisToPosix m.createdate
-                        ]
-                )
-                model.values
 
 
 init : Data.Sensor -> List Data.Measurement -> Model
