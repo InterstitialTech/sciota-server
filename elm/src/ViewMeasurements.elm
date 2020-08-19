@@ -50,7 +50,7 @@ view model =
                 (\m ->
                     E.row [ E.spacing 8 ]
                         [ E.text (String.fromFloat m.value)
-                        , Common.dateElt Time.utc <| Time.millisToPosix m.measuredate
+                        , Common.dateElt Time.utc <| Time.millisToPosix <| Debug.log "measuermentd" m.measuredate
                         , Common.dateElt Time.utc <| Time.millisToPosix m.createdate
                         ]
                 )

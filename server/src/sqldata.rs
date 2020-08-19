@@ -518,7 +518,7 @@ pub fn measurement_listing(
 
   // TODO: user owns this sensor?
   let mut pstmt = conn.prepare(
-    "SELECT id, value, sensor, measuredate, createdate
+    "SELECT id, value, measuredate, createdate
             FROM measurement where sensor = ?1",
   )?;
 
@@ -528,7 +528,7 @@ pub fn measurement_listing(
       value: row.get(1)?,
       sensor: sensor,
       measuredate: row.get(2)?,
-      createdate: row.get(2)?,
+      createdate: row.get(3)?,
     })
   })?;
 
