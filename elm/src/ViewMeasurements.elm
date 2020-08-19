@@ -87,7 +87,7 @@ view model =
                   }
                 ]
             }
-        , measureChart { width = 500, height = 1500 } model.values |> E.html
+        , measureChart { width = 1500, height = 500 } model.values |> E.html
         ]
 
 
@@ -98,7 +98,7 @@ measureChart dimension measurements =
             Axis.custom
                 { title = Title.default "date"
                 , variable = \x -> x.createdate |> toFloat |> Just
-                , pixels = round dimension.height
+                , pixels = round dimension.width
                 , range = Range.default
                 , axisLine = AxisLine.default
                 , ticks = Ticks.default
@@ -107,7 +107,7 @@ measureChart dimension measurements =
             Axis.custom
                 { title = Title.default "value"
                 , variable = \x -> x.value |> Just
-                , pixels = round dimension.width
+                , pixels = round dimension.height
                 , range = Range.default
                 , axisLine = AxisLine.default
                 , ticks = Ticks.default
