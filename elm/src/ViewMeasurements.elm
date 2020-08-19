@@ -6,7 +6,7 @@ import Dict exposing (Dict)
 import Element as E exposing (Element)
 import Element.Background as EBk
 import Element.Border as EBd
-import Element.Font as Font
+import Element.Font as EF
 import Element.Input as EI
 import Element.Region as ER
 import Html exposing (Attribute, Html)
@@ -38,24 +38,27 @@ type Command
 view : Model -> Element Msg
 view model =
     E.column
-        [ E.width E.fill ]
+        [ E.width E.fill, E.spacing 8 ]
     <|
-        [ E.text <| "Sensor: " ++ model.name
+        [ E.row []
+            [ E.row [ EF.bold ] [ E.text <| "Sensor: " ]
+            , E.text model.name
+            ]
         , E.row [ E.width E.fill ]
             [ EI.button Common.buttonStyle { onPress = Just DonePress, label = E.text "Done" }
             ]
         , E.table [ E.spacing 8 ]
             { data = model.values
             , columns =
-                [ { header = E.text "value"
+                [ { header = E.row [ EF.bold ] [ E.text "value" ]
                   , width = E.shrink
                   , view = \m -> E.text (String.fromFloat m.value)
                   }
-                , { header = E.text "measured"
+                , { header = E.row [ EF.bold ] [ E.text "measured" ]
                   , width = E.shrink
                   , view = \m -> Common.dateElt Time.utc <| Time.millisToPosix m.measuredate
                   }
-                , { header = E.text "created"
+                , { header = E.row [ EF.bold ] [ E.text "created" ]
                   , width = E.shrink
                   , view = \m -> Common.dateElt Time.utc <| Time.millisToPosix m.createdate
                   }
