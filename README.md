@@ -4,8 +4,11 @@ How to build:
 
 For the server, there are two parts: the elm frontend and the rust backend.  
 
+**build tools**
+
 For elm, you'll need elm 0.19.1, which is most likely the version that is install via apt if you're on debian.  
-For rust, standard rust+cargo will do - some projects depend on the nightly version of rust of new features, but this one does not.  Install that with [rustup.sh](https://rustup.rs/), or maybe with apt.
+
+For rust, standard rust+cargo will do.  rustc being the rust compiler, and cargo being the build tool that pulls in dependencies. Some projects depend on the nightly version of rust for new features, but this one does not.  Install rust/cargo with [rustup.sh](https://rustup.rs/), or maybe with apt if you prefer.
 
 **basic build**
 
