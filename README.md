@@ -16,11 +16,13 @@ To build the elm frontend, CD to elm/ and run `build.sh`.
 
 To build the rust part, CD to server/ and `cargo build`.  
 
+Configure the server with server/config.toml.
+
 When you first start the server (with `./target/debug/server`), you'll need to register a user.  This would normally happen by the server sending an email to you, but typically ISPs will block email sending.  For now the server will write each registration email out to last-email.txt.  Check that to get your registration 'magic link'.
 
 **dev build**
 
 If you're hacking on the elm code, the watch-build.sh will rebuild the elm code any time you save your changes.  This requires [elm-live](https://www.elm-live.com/).
 
-For rust you can get the same thing with the watchrun.sh script; this will recompile and restart the server any time you make a change to the rust source code.  The watch feature requires installing [cargo-watch](https://github.com/passcod/cargo-watch).  Configure the server with config.toml.
+For rust you can get the same thing with the watchrun.sh script; this will recompile and restart the server any time you make a change to the rust source code.  The watch feature requires installing [cargo-watch](https://github.com/passcod/cargo-watch).
 
