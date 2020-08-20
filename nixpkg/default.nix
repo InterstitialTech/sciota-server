@@ -15,10 +15,10 @@ rustPlatform.buildRustPackage rec {
   version = "1.0";
 
   src = fetchFromGitHub {
-    owner = "InterstitialTech"
+    owner = "InterstitialTech";
     repo = "sciota-server";
     rev = "25e29e4f432eca12f84a8c71a295e3d185bc5a90";
-    sha256 = "1k0x8z6m2326prsmz3mrs9yjn6kq92jaqw74if77di6pwz26qcig";
+    sha256 = "0dba6slp0y58kdylgsclll9yvl0xrb90djjqnwqsr22wgrjgarb8";
   };
 
   # ui = callPackage ./ui.nix { };
@@ -31,8 +31,8 @@ rustPlatform.buildRustPackage rec {
   postInstall = ''
     echo "postInstall"
     ls -l $out
-    mkdir ${out}/static
-    cp -r ${src}/server/static ${out}/static
+    mkdir $out/static
+    cp -r ${src}/server/static $out/static
     cp -r ${the_elm}/Main.js $out/static/main.js
   '';
 
@@ -52,7 +52,7 @@ rustPlatform.buildRustPackage rec {
     description = "A measurement repository for IOT devices.";
     homepage = https://github.com/InterstitialTech/sciota-server;
     license = with licenses; [ bsd3 ];
-    maintainers = [ bburdette, chronopoulos ];
+    maintainers = [ bburdette chronopoulos ];
     platforms = platforms.all;
   };
 }
