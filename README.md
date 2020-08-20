@@ -16,7 +16,7 @@ To build the elm frontend, CD to elm/ and run `build.sh`.
 
 To build the rust part, CD to server/ and `cargo build`.  
 
-When you first start the server (with `./target/debug/server`), you'll need to register a user.  This would normally happen by the server sending an email to you, but typically ISPs will block email sending.  For now the server will write each registration email out to last-email.txt.  Check that to get your registration `magic link`.
+When you first start the server (with `./target/debug/server`), you'll need to register a user.  This would normally happen by the server sending an email to you, but typically ISPs will block email sending.  For now the server will write each registration email out to last-email.txt.  Check that to get your registration 'magic link'.
 
 **dev build**
 
