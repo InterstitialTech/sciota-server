@@ -1,5 +1,5 @@
 { stdenv
-, fetchFromGitHub
+, fetchgit
 , rustPlatform
 , Security
 , openssl
@@ -14,13 +14,21 @@ rustPlatform.buildRustPackage rec {
   pname = "sciota-server";
   version = "1.0";
 
-  src = fetchFromGitHub {
-    owner = "InterstitialTech";
-    repo = "sciota-server";
-    rev = "25e29e4f432eca12f84a8c71a295e3d185bc5a90";
-    sha256 = "0dba6slp0y58kdylgsclll9yvl0xrb90djjqnwqsr22wgrjgarb8";
+  src = fetchgit {
+    url = "https://github.com/InterstitialTech/sciota-server.git";
+    rev = "18c4181f0228afcd152f1ae3754e8825ac8b3567";
+    sha256 = "14lncsrnvfcarlrh9dwkv33nwcf0xxsc8ysalvxrrv7d6sd90kgb";
+    fetchSubmodules = true;
   };
-
+  # src = fetchFromGitHub {
+  #   owner = "InterstitialTech";
+  #   repo = "sciota-server";
+  #   rev = "18c4181f0228afcd152f1ae3754e8825ac8b3567";
+  #   sha256 = "14lncsrnvfcarlrh9dwkv33nwcf0xxsc8ysalvxrrv7d6sd90kgb";
+  #   fetchSubmodules = true;
+  # };
+  # 3be7e31c95d0bc945a73ec27af608cea216da69c
+  # 3be7e31c95d0bc945a73ec27af608cea216da69c
   # ui = callPackage ./ui.nix { };
   the_elm = callPackage "${src}/elm" {  };
 
