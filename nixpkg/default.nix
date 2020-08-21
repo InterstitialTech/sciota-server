@@ -1,7 +1,6 @@
 { stdenv
 , fetchgit
 , rustPlatform
-, Security
 , openssl
 , pkgconfig
 , sqlite
@@ -16,8 +15,8 @@ rustPlatform.buildRustPackage rec {
 
   src = fetchgit {
     url = "https://github.com/InterstitialTech/sciota-server.git";
-    rev = "18c4181f0228afcd152f1ae3754e8825ac8b3567";
-    sha256 = "14lncsrnvfcarlrh9dwkv33nwcf0xxsc8ysalvxrrv7d6sd90kgb";
+    rev = "fe5ae8873e5e19fc3deb40aee4da225dfcbab66c";
+    sha256 = "189ijsk9kfddjkw84wg4q6q9wm72djq8jhr8whq92sp4h8f1hfs4";
     fetchSubmodules = true;
   };
   # src = fetchFromGitHub {
@@ -48,11 +47,11 @@ rustPlatform.buildRustPackage rec {
   subPackages = [ "." ];
 
 
-#  sourceRoot = "source/server";
+  sourceRoot = "${src}/server";
   cargoSha256 = "1jdbjx3xa7f4yhq4l7xsgy6jpdr2lkgqrzarqb5vj2s3jg13kyl4";
   # dontMakeSourcesWritable=1;
 
-  buildInputs = [(stdenv.lib.optional stdenv.isDarwin Security) openssl sqlite];
+  buildInputs = [openssl sqlite];
 
   nativeBuildInputs = [ pkgconfig ];
 
