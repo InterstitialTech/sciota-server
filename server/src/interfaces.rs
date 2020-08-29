@@ -165,6 +165,16 @@ fn user_interface_loggedin(
         content: serde_json::to_value(deviceid)?,
       })
     }
+    "deletedevice" => {
+      let msgdata = Option::ok_or(msg.data.as_ref(), "malformed json data")?;
+      let deviceid: i64 = serde_json::from_value(msgdata.clone())?;
+
+      sqldata::delete_device(&config.db.as_path(), uid, deviceid)?;
+      Ok(ServerResponse {
+        what: "deleteddevice".to_string(),
+        content: serde_json::to_value(deviceid)?,
+      })
+    }
     "getsensorlisting" => {
       let msgdata = Option::ok_or(msg.data.as_ref(), "malformed json data")?;
       let deviceid: i64 = serde_json::from_value(msgdata.clone())?;

@@ -73,8 +73,16 @@ pub struct User {
   pub registration_key: Option<String>,
 }
 
-pub fn dbinit(dbfile: &Path) -> rusqlite::Result<()> {
+pub fn connection_open(dbfile: &Path) -> rusqlite::Result<Connection> {
   let conn = Connection::open(dbfile)?;
+
+  conn.execute("PRAGMA foreign_keys = true;", params![])?;
+
+  Ok(conn)
+}
+
+pub fn dbinit(dbfile: &Path) -> rusqlite::Result<()> {
+  let conn = connection_open(dbfile)?;
 
   conn.execute(
     "CREATE TABLE user (
@@ -141,7 +149,7 @@ pub fn now() -> Result<i64, Box<dyn Error>> {
 // user CRUD
 
 pub fn add_user(dbfile: &Path, name: &str, hashwd: &str) -> Result<i64, Box<dyn Error>> {
-  let conn = Connection::open(dbfile)?;
+  let conn = connection_open(dbfile)?;
 
   let nowi64secs = now()?;
 
@@ -158,7 +166,7 @@ pub fn add_user(dbfile: &Path, name: &str, hashwd: &str) -> Result<i64, Box<dyn 
 }
 
 pub fn read_user(dbfile: &Path, name: &str) -> Result<User, Box<dyn Error>> {
-  let conn = Connection::open(dbfile)?;
+  let conn = connection_open(dbfile)?;
 
   let user = conn.query_row(
     "SELECT id, hashwd, salt, email, registration_key
@@ -180,7 +188,7 @@ pub fn read_user(dbfile: &Path, name: &str) -> Result<User, Box<dyn Error>> {
 }
 
 pub fn update_user(dbfile: &Path, user: &User) -> Result<(), Box<dyn Error>> {
-  let conn = Connection::open(dbfile)?;
+  let conn = connection_open(dbfile)?;
 
   conn.execute(
     "UPDATE user SET name = ?1, hashwd = ?2, salt = ?3, email = ?4, registration_key = ?5
@@ -206,7 +214,7 @@ pub fn new_user(
   email: String,
   registration_key: String,
 ) -> Result<i64, Box<dyn Error>> {
-  let conn = Connection::open(dbfile)?;
+  let conn = connection_open(dbfile)?;
 
   let now = now()?;
 
@@ -227,7 +235,7 @@ pub fn save_device(
   uid: i64,
   savedevice: &SaveDevice,
 ) -> Result<i64, Box<dyn Error>> {
-  let conn = Connection::open(dbfile)?;
+  let conn = connection_open(dbfile)?;
 
   let now = now()?;
 
@@ -266,7 +274,7 @@ pub fn save_device(
 }
 
 pub fn read_device(dbfile: &Path, id: i64) -> Result<Device, Box<dyn Error>> {
-  let conn = Connection::open(dbfile)?;
+  let conn = connection_open(dbfile)?;
 
   let rbe = conn.query_row(
     "SELECT name, description, createdate, changeddate
@@ -288,7 +296,7 @@ pub fn read_device(dbfile: &Path, id: i64) -> Result<Device, Box<dyn Error>> {
 }
 
 pub fn delete_device(dbfile: &Path, uid: i64, id: i64) -> Result<(), Box<dyn Error>> {
-  let conn = Connection::open(dbfile)?;
+  let conn = connection_open(dbfile)?;
 
   // TODO: delete all sensors from this device also.
   // only delete when user is in the device
@@ -300,7 +308,7 @@ pub fn delete_device(dbfile: &Path, uid: i64, id: i64) -> Result<(), Box<dyn Err
 }
 
 pub fn devicelisting(dbfile: &Path, user: i64) -> rusqlite::Result<Vec<Device>> {
-  let conn = Connection::open(dbfile)?;
+  let conn = connection_open(dbfile)?;
 
   let mut pstmt = conn.prepare(
     "SELECT id, name, description, user, createdate, changeddate
@@ -337,7 +345,7 @@ pub fn devicelisting(dbfile: &Path, user: i64) -> rusqlite::Result<Vec<Device>> 
 // sensor CRUD
 
 pub fn save_sensor(dbfile: &Path, uid: i64, sensor: &SaveSensor) -> Result<Sensor, Box<dyn Error>> {
-  let conn = Connection::open(dbfile)?;
+  let conn = connection_open(dbfile)?;
 
   let now = now()?;
 
@@ -381,7 +389,7 @@ pub fn save_sensor(dbfile: &Path, uid: i64, sensor: &SaveSensor) -> Result<Senso
 }
 
 pub fn read_sensor(dbfile: &Path, id: i64) -> Result<Sensor, Box<dyn Error>> {
-  let conn = Connection::open(dbfile)?;
+  let conn = connection_open(dbfile)?;
 
   let rbe = conn.query_row(
     "SELECT device, name, description, createdate, changeddate
@@ -402,7 +410,7 @@ pub fn read_sensor(dbfile: &Path, id: i64) -> Result<Sensor, Box<dyn Error>> {
   Ok(rbe)
 }
 pub fn delete_sensor(dbfile: &Path, uid: i64, sensorid: i64) -> Result<(), Box<dyn Error>> {
-  let conn = Connection::open(dbfile)?;
+  let conn = connection_open(dbfile)?;
 
   // only delete when user is in the zk
   conn.execute(
@@ -419,7 +427,7 @@ pub fn sensorlisting(
   user: i64,
   device: Option<i64>,
 ) -> rusqlite::Result<Vec<Sensor>> {
-  let conn = Connection::open(dbfile)?;
+  let conn = connection_open(dbfile)?;
 
   let mut pv = Vec::new();
   match device {
@@ -490,7 +498,7 @@ pub fn add_measurement(
   uid: i64,
   measurement: &SaveMeasurement,
 ) -> Result<i64, Box<dyn Error>> {
-  let conn = Connection::open(dbfile)?;
+  let conn = connection_open(dbfile)?;
 
   let now = now()?;
 
@@ -514,7 +522,7 @@ pub fn measurement_listing(
   uid: i64,
   sensor: i64,
 ) -> Result<Vec<Measurement>, Box<dyn Error>> {
-  let conn = Connection::open(dbfile)?;
+  let conn = connection_open(dbfile)?;
 
   // TODO: user owns this sensor?
   let mut pstmt = conn.prepare(
