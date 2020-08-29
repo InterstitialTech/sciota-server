@@ -15,8 +15,8 @@ rustPlatform.buildRustPackage rec {
 
   src = fetchgit {
     url = "https://github.com/InterstitialTech/sciota-server.git";
-    rev = "fe5ae8873e5e19fc3deb40aee4da225dfcbab66c";
-    sha256 = "189ijsk9kfddjkw84wg4q6q9wm72djq8jhr8whq92sp4h8f1hfs4";
+    rev = "3e78330f3b19428443358b3829c769f76dbe1d69";
+    sha256 = "14d2pvf81kq54h8wvmxwc5dljc8yhrhx2v2q4vzc9rpawmsf7f4r";
     fetchSubmodules = true;
   };
   # src = fetchFromGitHub {

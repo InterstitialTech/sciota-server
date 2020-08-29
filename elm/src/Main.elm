@@ -663,7 +663,7 @@ parseUrl url =
 
 initLogin : Seed -> State
 initLogin seed =
-    Login <| Login.initialModel Nothing "mahbloag" seed
+    Login <| Login.initialModel Nothing "sciota-server" seed
 
 
 routeState : String -> Seed -> Route -> ( State, Cmd Msg )
