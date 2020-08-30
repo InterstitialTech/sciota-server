@@ -1,3 +1,6 @@
 [submodule "elm-common"]
 	path = elm/elm-common
 	url = https://github.com/bburdette/elm-common.git
+[submodule "sciota-protocol"]
+	path = sciota-protocol
+	url = https://github.com/InterstitialTech/sciota-protocol.git
