@@ -1,4 +1,8 @@
 use rusqlite::{params, Connection};
+use sciota_protocol::protocol::{
+  Device, Measurement, MeasurementQuery, PublicMessage, RegistrationData, SaveDevice,
+  SaveMeasurement, SaveSensor, Sensor, ServerResponse, UserMessage,
+};
 use serde_json;
 use std::convert::TryInto;
 use std::error::Error;
@@ -11,6 +15,16 @@ pub fn connection_open(dbfile: &Path) -> rusqlite::Result<Connection> {
   conn.execute("PRAGMA foreign_keys = true;", params![])?;
 
   Ok(conn)
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+pub struct User {
+  pub id: i64,
+  pub name: String,
+  pub hashwd: String,
+  pub salt: String,
+  pub email: String,
+  pub registration_key: Option<String>,
 }
 
 pub fn dbinit(dbfile: &Path) -> rusqlite::Result<()> {

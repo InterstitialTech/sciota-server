@@ -1,9 +1,6 @@
 extern crate actix_files;
 extern crate actix_rt;
 extern crate actix_web;
-extern crate reqwest;
-#[macro_use]
-extern crate simple_error;
 extern crate crypto_hash;
 extern crate env_logger;
 extern crate futures;
@@ -11,7 +8,9 @@ extern crate json;
 extern crate lettre;
 extern crate lettre_email;
 extern crate rand;
+extern crate reqwest;
 extern crate serde_json;
+extern crate simple_error;
 extern crate time;
 extern crate toml;
 extern crate uuid;
@@ -21,6 +20,7 @@ extern crate rusqlite;
 #[macro_use]
 extern crate serde_derive;
 extern crate base64;
+extern crate sciota_protocol;
 
 mod config;
 mod email;
@@ -37,7 +37,7 @@ use actix_web::{
 };
 use config::Config;
 use futures::future::Future;
-use interfaces::{PublicMessage, ServerResponse, UserMessage};
+use sciota_protocol::protocol::{PublicMessage, ServerResponse, UserMessage};
 use std::error::Error;
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, RwLock};

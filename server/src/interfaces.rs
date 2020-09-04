@@ -1,6 +1,10 @@
 use config::Config;
 use crypto_hash::{hex_digest, Algorithm};
 use email;
+use sciota_protocol::protocol::{
+  Device, Measurement, MeasurementQuery, PublicMessage, RegistrationData, SaveDevice,
+  SaveMeasurement, SaveSensor, Sensor, ServerResponse, UserMessage,
+};
 use serde_json::Value;
 use simple_error;
 use sqldata;
@@ -131,7 +135,7 @@ fn user_interface_loggedin(
     }
     "savedevice" => {
       let msgdata = Option::ok_or(msg.data.as_ref(), "malformed json data")?;
-      let sz: sqldata::SaveDevice = serde_json::from_value(msgdata.clone())?;
+      let sz: SaveDevice = serde_json::from_value(msgdata.clone())?;
 
       let deviceid = sqldata::save_device(&config.db.as_path(), uid, &sz)?;
       Ok(ServerResponse {
@@ -161,7 +165,7 @@ fn user_interface_loggedin(
     }
     "savesensor" => {
       let msgdata = Option::ok_or(msg.data.as_ref(), "malformed json data")?;
-      let sbe: sqldata::SaveSensor = serde_json::from_value(msgdata.clone())?;
+      let sbe: SaveSensor = serde_json::from_value(msgdata.clone())?;
 
       let s = sqldata::save_sensor(&config.db.as_path(), uid, &sbe)?;
       Ok(ServerResponse {
@@ -171,7 +175,7 @@ fn user_interface_loggedin(
     }
     "savemeasurement" => {
       let msgdata = Option::ok_or(msg.data.as_ref(), "malformed json data")?;
-      let m: sqldata::SaveMeasurement = serde_json::from_value(msgdata.clone())?;
+      let m: SaveMeasurement = serde_json::from_value(msgdata.clone())?;
       let s = sqldata::add_measurement(&config.db.as_path(), uid, &m)?;
       Ok(ServerResponse {
         what: "savedmeasurement".to_string(),
@@ -180,7 +184,7 @@ fn user_interface_loggedin(
     }
     "getmeasurementlisting" => {
       let msgdata = Option::ok_or(msg.data.as_ref(), "malformed json data")?;
-      let mq: sqldata::MeasurementQuery = serde_json::from_value(msgdata.clone())?;
+      let mq: MeasurementQuery = serde_json::from_value(msgdata.clone())?;
 
       let entries = sqldata::measurement_listing(Path::new(&config.db), uid, mq.sensor)?;
       Ok(ServerResponse {

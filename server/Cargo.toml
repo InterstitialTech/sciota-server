@@ -25,5 +25,5 @@ json = "*"
 reqwest = "0.9.24"
 lettre = "0.9"
 lettre_email = "0.9"
-sciota_protocol = { git = "https://github.com/interstitial/sciota_protocol", path = "api/rust" }
+sciota-protocol = { path = "../sciota-protocol/api/rust" }
 
