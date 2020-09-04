@@ -9,35 +9,9 @@ use std::path::Path;
 use util;
 use uuid::Uuid;
 
-#[derive(Serialize, Deserialize)]
-pub struct ServerResponse {
-  pub what: String,
-  pub content: Value,
-}
-
 #[derive(Clone)]
 pub struct AppState {
   pub htmlstring: String,
-  // pub publicmtb: Arc<RwLock<MetaTagBase>>,
-}
-
-#[derive(Deserialize, Debug)]
-pub struct UserMessage {
-  pub uid: String,
-  pwd: String,
-  what: String,
-  data: Option<serde_json::Value>,
-}
-
-#[derive(Deserialize, Debug)]
-pub struct PublicMessage {
-  what: String,
-  data: Option<serde_json::Value>,
-}
-
-#[derive(Deserialize, Debug)]
-pub struct RegistrationData {
-  email: String,
 }
 
 pub fn user_interface(config: &Config, msg: UserMessage) -> Result<ServerResponse, Box<dyn Error>> {
