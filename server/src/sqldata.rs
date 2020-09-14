@@ -1,3 +1,5 @@
+use barrel::backend::Sqlite;
+use barrel::{types, Migration};
 use rusqlite::{params, Connection};
 use sciota_protocol::protocol::{
   Device, Measurement, MeasurementQuery, PublicMessage, RegistrationData, SaveDevice,
@@ -15,6 +17,75 @@ pub fn connection_open(dbfile: &Path) -> rusqlite::Result<Connection> {
   conn.execute("PRAGMA foreign_keys = true;", params![])?;
 
   Ok(conn)
+}
+
+pub fn mekmig() {
+  let mut m = Migration::new();
+
+  m.create_table("user", |t| {
+    t.add_column(
+      "id",
+      types::integer()
+        .primary(true)
+        .increments(true)
+        .nullable(false),
+    );
+    t.add_column("name", types::text().nullable(false).unique(true));
+    t.add_column("hashwd", types::text().nullable(false));
+    t.add_column("salt", types::text().nullable(false));
+    t.add_column("email", types::text().nullable(false));
+    t.add_column("registration_key", types::text().nullable(true));
+    t.add_column("createdate", types::integer().nullable(false));
+  });
+
+  m.create_table("device", |t| {
+    t.add_column(
+      "id",
+      types::integer()
+        .primary(true)
+        .increments(true)
+        .nullable(false),
+    );
+    t.add_column("user", types::foreign("user", "id").nullable(false));
+    t.add_column("name", types::text().nullable(false));
+    t.add_column("description", types::text().nullable(false));
+    t.add_column("createdate", types::integer().nullable(false));
+    t.add_column("changeddate", types::integer().nullable(false));
+  });
+
+  m.create_table("sensor", |t| {
+    t.add_column(
+      "id",
+      types::integer()
+        .primary(true)
+        .increments(true)
+        .nullable(false),
+    );
+    t.add_column(
+      "device",
+      types::foreign("device", vec!["id"]).nullable(false),
+    );
+    t.add_column("name", types::text().nullable(false));
+    t.add_column("description", types::text().nullable(false));
+    t.add_column("createdate", types::integer().nullable(false));
+    t.add_column("changeddate", types::integer().nullable(false));
+  });
+
+  m.create_table("measurement", |t| {
+    t.add_column(
+      "id",
+      types::integer()
+        .primary(true)
+        .increments(true)
+        .nullable(false),
+    );
+    t.add_column("sensor", types::foreign("sensor", "id").nullable(false));
+    t.add_column("value", types::float().nullable(false));
+    t.add_column("measuredate", types::integer().nullable(false));
+    t.add_column("createdate", types::integer().nullable(false));
+  });
+
+  println!("{}", m.make::<Sqlite>());
 }
 
 #[derive(Deserialize, Serialize, Debug)]
