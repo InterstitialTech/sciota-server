@@ -19,6 +19,7 @@ extern crate log;
 extern crate rusqlite;
 #[macro_use]
 extern crate serde_derive;
+extern crate barrel;
 extern crate base64;
 extern crate sciota_protocol;
 
@@ -174,6 +175,7 @@ fn load_config() -> Config {
 }
 
 fn main() {
+
   match err_main() {
     Err(e) => println!("error: {:?}", e),
     Ok(_) => (),
