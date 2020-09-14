@@ -19,7 +19,7 @@ pub fn connection_open(dbfile: &Path) -> rusqlite::Result<Connection> {
   Ok(conn)
 }
 
-pub fn mekmig() {
+pub fn initialdb() -> Migration {
   let mut m = Migration::new();
 
   m.create_table("user", |t| {
@@ -85,7 +85,7 @@ pub fn mekmig() {
     t.add_column("createdate", types::integer().nullable(false));
   });
 
-  println!("{}", m.make::<Sqlite>());
+  m
 }
 
 #[derive(Deserialize, Serialize, Debug)]
@@ -101,55 +101,7 @@ pub struct User {
 pub fn dbinit(dbfile: &Path) -> rusqlite::Result<()> {
   let conn = connection_open(dbfile)?;
 
-  conn.execute(
-    "CREATE TABLE user (
-                id          INTEGER NOT NULL PRIMARY KEY,
-                name        TEXT NOT NULL UNIQUE,
-                hashwd      TEXT NOT NULL,
-                salt        TEXT NOT NULL,
-                email       TEXT NOT NULL,
-                registration_key  TEXT,
-                createdate  INTEGER NOT NULL
-                )",
-    params![],
-  )?;
-
-  conn.execute(
-    "CREATE TABLE sensor (
-                id            INTEGER NOT NULL PRIMARY KEY,
-                device 				INTEGER NOT NULL,
-                name          TEXT NOT NULL,
-                description   TEXT NOT NULL,
-                createdate    INTEGER NOT NULL,
-                changeddate   INTEGER NOT NULL,
-                FOREIGN KEY(device) REFERENCES device(id)
-                )",
-    params![],
-  )?;
-
-  conn.execute(
-    "CREATE TABLE device (
-                id            INTEGER NOT NULL PRIMARY KEY,
-                user 					INTEGER NOT NULL,
-                name          TEXT NOT NULL,
-                description   TEXT NOT NULL,
-                createdate    INTEGER NOT NULL,
-                changeddate   INTEGER NOT NULL,
-                FOREIGN KEY(user) REFERENCES user(id)
-                )",
-    params![],
-  )?;
-
-  conn.execute(
-    "CREATE TABLE measurement (
-                id            INTEGER NOT NULL PRIMARY KEY,
-                sensor        INTEGER NOT NULL,
-                value         REAL NOT NULL,
-                measuredate   INTEGER NOT NULL,
-                createdate    INTEGER NOT NULL
-                )",
-    params![],
-  )?;
+  conn.execute_batch(initialdb().make::<Sqlite>().as_str())?;
 
   Ok(())
 }
@@ -277,15 +229,7 @@ pub fn save_device(
         params![savedevice.name, uid, savedevice.description, now, now],
       )?;
 
-      let deviceid = conn.last_insert_rowid();
-
-      // conn.execute(
-      //   "INSERT INTO devicemember (device, user)
-      //    VALUES (?1, ?2)",
-      //   params![deviceid, uid],
-      // )?;
-
-      Ok(deviceid)
+      Ok(conn.last_insert_rowid())
     }
   }
 }

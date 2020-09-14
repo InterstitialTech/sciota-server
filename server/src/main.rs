@@ -175,7 +175,6 @@ fn load_config() -> Config {
 }
 
 fn main() {
-  sqldata::mekmig();
 
   match err_main() {
     Err(e) => println!("error: {:?}", e),
