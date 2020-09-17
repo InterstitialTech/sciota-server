@@ -44,7 +44,7 @@ import Schelme.Show exposing (showTerm)
 
 
 type Msg
-    = OnMarkdownInput String
+    = OnDescriptionChanged String
     | OnNameChanged String
     | SavePress
     | DonePress
@@ -56,7 +56,7 @@ type Msg
 type alias Model =
     { id : Maybe Int
     , name : String
-    , md : String
+    , description : String
     , esl : ESL.Model
     }
 
@@ -75,8 +75,8 @@ type Command
 view : Model -> Element Msg
 view model =
     E.column
-        [ E.width E.fill ]
-        [ E.row [ E.width E.fill ]
+        [ E.width E.fill, E.padding 10, E.spacing 8 ]
+        [ E.row [ E.width E.fill, E.spacing 8 ]
             [ EI.button Common.buttonStyle { onPress = Just SavePress, label = E.text "Save" }
             , EI.button Common.buttonStyle { onPress = Just DonePress, label = E.text "Done" }
             , EI.button Common.buttonStyle { onPress = Just ViewPress, label = E.text "View" }
@@ -90,10 +90,10 @@ view model =
             }
         , E.row [ E.width E.fill ]
             [ EI.multiline [ E.width (E.px 400) ]
-                { onChange = OnMarkdownInput
-                , text = model.md
+                { onChange = OnDescriptionChanged
+                , text = model.description
                 , placeholder = Nothing
-                , label = EI.labelHidden "Markdown input"
+                , label = EI.labelHidden "description"
                 , spellcheck = False
                 }
             ]
@@ -106,7 +106,7 @@ init : Data.Device -> List Data.Sensor -> Model
 init device sensors =
     { id = Just device.id
     , name = device.name
-    , md = device.description
+    , description = device.description
     , esl = ESL.init sensors
     }
 
@@ -115,7 +115,7 @@ initNew : Model
 initNew =
     { id = Nothing
     , name = ""
-    , md = ""
+    , description = ""
     , esl = ESL.initNew
     }
 
@@ -141,7 +141,7 @@ update msg model =
             , Save
                 { id = model.id
                 , name = model.name
-                , description = model.md
+                , description = model.description
                 }
             )
 
@@ -150,7 +150,7 @@ update msg model =
             , View
                 { id = model.id
                 , name = model.name
-                , description = model.md
+                , description = model.description
                 }
             )
 
@@ -168,9 +168,9 @@ update msg model =
         OnNameChanged t ->
             ( { model | name = t }, None )
 
-        OnMarkdownInput newMarkdown ->
+        OnDescriptionChanged s ->
             ( { model
-                | md = newMarkdown
+                | description = s
               }
             , None
             )

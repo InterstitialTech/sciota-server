@@ -29,18 +29,26 @@ type Command
 view : Model -> Element Msg
 view model =
     E.column [ E.spacing 8, E.padding 8 ] <|
-        E.row [ E.spacing 20 ]
+        [ E.row [ E.spacing 20 ]
             [ E.text "Select a device"
-            , EI.button Common.buttonStyle { onPress = Just NewPress, label = E.text "new" }
+            , EI.button Common.buttonStyle
+                { onPress = Just NewPress, label = E.text "new" }
             ]
-            :: List.map
-                (\e ->
-                    E.row [ E.spacing 8 ]
-                        [ E.text e.name
-                        , EI.button Common.buttonStyle { onPress = Just (SelectPress e), label = E.text "edit" }
-                        ]
-                )
-                model.devices
+        , E.table
+            [ E.spacing 8 ]
+            { data = model.devices
+            , columns =
+                [ { header = E.none
+                  , width = E.shrink
+                  , view = \dev -> E.text dev.name
+                  }
+                , { header = E.none
+                  , width = E.shrink
+                  , view = \dev -> EI.button Common.buttonStyle { onPress = Just (SelectPress dev), label = E.text "edit" }
+                  }
+                ]
+            }
+        ]
 
 
 update : Msg -> Model -> ( Model, Command )

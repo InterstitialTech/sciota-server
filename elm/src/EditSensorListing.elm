@@ -63,21 +63,41 @@ setSensor sensor model =
 view : Model -> Element Msg
 view model =
     E.column [ E.spacing 8, E.padding 8 ] <|
-        E.row [ E.spacing 20 ]
+        [ E.row [ E.spacing 20 ]
             [ E.text "Select a sensor"
             , EI.button Common.buttonStyle { onPress = Just NewPress, label = E.text "new" }
             ]
-            :: List.map
-                (\e ->
-                    E.row [ E.spacing 8 ]
-                        [ E.row [ Font.bold ] [ E.text <| String.fromInt e.id ]
-                        , E.text " - "
-                        , E.text e.name
-                        , EI.button Common.buttonStyle { onPress = Just (SelectPress e), label = E.text "edit" }
-                        , EI.button Common.buttonStyle { onPress = Just (ViewPress e), label = E.text "view" }
-                        ]
-                )
-                model.sensors
+        , E.table [ E.spacing 8 ]
+            { data = model.sensors
+            , columns =
+                [ { header = E.none
+                  , width = E.shrink
+                  , view =
+                        \e ->
+                            E.row []
+                                [ E.row [ Font.bold ] [ E.text <| String.fromInt e.id ]
+                                , E.text " - "
+                                ]
+                  }
+                , { header = E.none
+                  , width = E.shrink
+                  , view = \e -> E.text e.name
+                  }
+                , { header = E.none
+                  , width = E.shrink
+                  , view =
+                        \e ->
+                            EI.button Common.buttonStyle { onPress = Just (SelectPress e), label = E.text "edit" }
+                  }
+                , { header = E.none
+                  , width = E.shrink
+                  , view =
+                        \e ->
+                            EI.button Common.buttonStyle { onPress = Just (ViewPress e), label = E.text "view" }
+                  }
+                ]
+            }
+        ]
 
 
 update : Msg -> Model -> ( Model, Command )
