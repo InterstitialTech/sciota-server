@@ -11,6 +11,17 @@ use std::error::Error;
 use std::path::Path;
 use std::time::SystemTime;
 
+#[derive(Deserialize, Serialize, Debug)]
+pub struct User {
+  pub id: i64,
+  pub name: String,
+  pub hashwd: String,
+  pub salt: String,
+  pub email: String,
+  pub registration_key: Option<String>,
+}
+
+// use this to open connections so we'll get foreign key checks
 pub fn connection_open(dbfile: &Path) -> rusqlite::Result<Connection> {
   let conn = Connection::open(dbfile)?;
 
@@ -88,21 +99,35 @@ pub fn initialdb() -> Migration {
   m
 }
 
-#[derive(Deserialize, Serialize, Debug)]
-pub struct User {
-  pub id: i64,
-  pub name: String,
-  pub hashwd: String,
-  pub salt: String,
-  pub email: String,
-  pub registration_key: Option<String>,
+pub fn update1() -> Migration {
+  let mut m = Migration::new();
+
+  // table for storing single values.  We'll store our migration level here.
+  m.create_table("singlevalue", |t| {
+    t.add_column("name", types::text().nullable(false).unique(true));
+    t.add_column("value", types::text().nullable(false));
+  });
+
+  m
+}
+pub fn get_single_value(conn: &Connection, name: &str) -> Result<Option<String>, Box<dyn Error>> {
+  match conn.query_row(
+    "select value from singlevalue where name = ?1",
+    params![name],
+    |row| Ok(row.get(0)?),
+  ) {
+    Ok(v) => Ok(Some(v)),
+    Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
+    Err(x) => Err(Box::new(x)),
+  }
 }
 
-pub fn dbinit(dbfile: &Path) -> rusqlite::Result<()> {
-  let conn = connection_open(dbfile)?;
-
-  conn.execute_batch(initialdb().make::<Sqlite>().as_str())?;
-
+pub fn set_single_value(conn: &Connection, name: &str, value: &str) -> Result<(), Box<dyn Error>> {
+  conn.execute(
+    "INSERT INTO singlevalue (name, value) values (?1, ?2)
+        ON CONFLICT (name) DO UPDATE SET value = ?2 where name = ?1",
+    params![name, value],
+  )?;
   Ok(())
 }
 
@@ -112,6 +137,33 @@ pub fn now() -> Result<i64, Box<dyn Error>> {
     .map(|n| n.as_millis())?;
   let s: i64 = nowsecs.try_into()?;
   Ok(s)
+}
+
+pub fn dbinit(dbfile: &Path) -> Result<(), Box<dyn Error>> {
+  let exists = dbfile.exists();
+
+  let conn = connection_open(dbfile)?;
+
+  if !exists {
+    println!("initialdb");
+    conn.execute_batch(initialdb().make::<Sqlite>().as_str())?;
+  }
+
+  match get_single_value(&conn, "migration_level") {
+    Err(_) => {
+      println!("update1");
+      conn.execute_batch(update1().make::<Sqlite>().as_str())?;
+      set_single_value(&conn, "migration_level", "1")?;
+    }
+    Ok(_) => {
+      // nothing beyond update1 yet.
+    }
+  }
+  println!("db up to date.");
+
+  // conn.execute_batch(initialdb().make::<Sqlite>().as_str());
+
+  Ok(())
 }
 
 // --------------------------------------------------------------------------------------
