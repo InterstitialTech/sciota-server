@@ -564,6 +564,15 @@ update msg model =
                     , Cmd.none
                     )
 
+                EditSensor.Delete id ->
+                    ( { model
+                        | state = esstate Nothing
+                      }
+                    , sendUIMsg model.location
+                        login
+                        (UI.DeleteSensor id)
+                    )
+
                 EditSensor.AddMeasurement id value ->
                     ( model
                     , sendUIMsg model.location

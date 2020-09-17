@@ -173,6 +173,16 @@ fn user_interface_loggedin(
         content: serde_json::to_value(s)?,
       })
     }
+    "deletesensor" => {
+      let msgdata = Option::ok_or(msg.data.as_ref(), "malformed json data")?;
+      let id: i64 = serde_json::from_value(msgdata.clone())?;
+
+      sqldata::delete_sensor(&config.db.as_path(), uid, id)?;
+      Ok(ServerResponse {
+        what: "deletedsensor".to_string(),
+        content: serde_json::to_value(id)?,
+      })
+    }
     "savemeasurement" => {
       let msgdata = Option::ok_or(msg.data.as_ref(), "malformed json data")?;
       let m: SaveMeasurement = serde_json::from_value(msgdata.clone())?;

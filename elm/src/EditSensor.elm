@@ -25,6 +25,7 @@ type Msg
     | OnValueChanged String
     | AddPress
     | SavePress
+    | DeletePress
     | DonePress
 
 
@@ -42,6 +43,7 @@ type Command
     = None
     | Save Data.SaveSensor
     | AddMeasurement Int Float
+    | Delete Int
     | Cancel
 
 
@@ -53,6 +55,7 @@ view model =
         , E.row [ E.width E.fill ]
             [ EI.button Common.buttonStyle { onPress = Just SavePress, label = E.text "Ok" }
             , EI.button Common.buttonStyle { onPress = Just DonePress, label = E.text "Cancel" }
+            , EI.button Common.buttonStyle { onPress = Just DeletePress, label = E.text "Delete" }
             ]
         , EI.text []
             { onChange = OnNameChanged
@@ -65,7 +68,7 @@ view model =
                 { onChange = OnDescriptionChanged
                 , text = model.description
                 , placeholder = Nothing
-                , label = EI.labelHidden "Markdown input"
+                , label = EI.labelHidden "Description"
                 , spellcheck = False
                 }
             ]
@@ -134,6 +137,9 @@ update msg model =
 
         DonePress ->
             ( model, Cancel )
+
+        DeletePress ->
+            ( model, model.id |> Maybe.map Delete |> Maybe.withDefault None )
 
         OnNameChanged t ->
             ( { model | name = t }, None )
