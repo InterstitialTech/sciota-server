@@ -56,8 +56,20 @@ setSensor sensor model =
         [] ->
             { model | sensors = sensor :: model.sensors }
 
-        a :: b ->
+        _ :: b ->
             { model | sensors = l ++ sensor :: b }
+
+
+removeSensor : Int -> Model -> Model
+removeSensor sensorid model =
+    -- if theres a sensor in the list with this id, replace it.
+    let
+        ( l, r ) =
+            Util.splitAt
+                (\s -> s.id == sensorid)
+                model.sensors
+    in
+    { model | sensors = l ++ Util.rest r }
 
 
 view : Model -> Element Msg

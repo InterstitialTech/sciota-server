@@ -57,11 +57,17 @@ type WaitMode
     | WmMeasurements (List Data.Measurement -> State)
 
 
+type EditResult a
+    = Edited a
+    | Canceled
+    | Deleted Int
+
+
 type State
     = Login Login.Model
     | EditDevice EditDevice.Model Data.Login
     | EditDeviceListing EditDeviceListing.Model Data.Login
-    | EditSensor EditSensor.Model Data.Login (Maybe Data.Sensor -> State)
+    | EditSensor EditSensor.Model Data.Login (EditResult Data.Sensor -> State)
       -- | EditSensorListing EditSensorListing.Model Data.Login
     | BadError BadError.Model State
     | ShowMessage ShowMessage.Model Data.Login
@@ -390,7 +396,7 @@ update msg model =
                         UI.SensorSaved sensor ->
                             case state of
                                 EditSensor emod login tostate ->
-                                    ( { model | state = tostate (Just sensor) }
+                                    ( { model | state = tostate (Edited sensor) }
                                     , Cmd.none
                                     )
 
@@ -481,13 +487,16 @@ update msg model =
                             EditSensor
                                 (EditSensor.initNew deviceid)
                                 login
-                                (\mbsensor ->
-                                    case mbsensor of
-                                        Just sensor ->
+                                (\ersensor ->
+                                    case Debug.log "ersensors" ersensor of
+                                        Edited sensor ->
                                             EditDevice (EditDevice.setSensor sensor es) login
 
-                                        Nothing ->
+                                        Canceled ->
                                             EditDevice es login
+
+                                        Deleted id ->
+                                            EditDevice (EditDevice.removeSensor id es) login
                                 )
                       }
                     , Cmd.none
@@ -499,13 +508,16 @@ update msg model =
                             EditSensor
                                 (EditSensor.init sensor)
                                 login
-                                (\mbsensor ->
-                                    case mbsensor of
-                                        Just s ->
-                                            EditDevice (EditDevice.setSensor s es) login
+                                (\ersensor ->
+                                    case Debug.log "ersensors" ersensor of
+                                        Edited er_sensor ->
+                                            EditDevice (EditDevice.setSensor er_sensor es) login
 
-                                        Nothing ->
+                                        Canceled ->
                                             EditDevice es login
+
+                                        Deleted id ->
+                                            EditDevice (EditDevice.removeSensor id es) login
                                 )
                       }
                     , Cmd.none
@@ -547,11 +559,11 @@ update msg model =
                     EditSensor.update em es
             in
             case ecmd of
-                EditSensor.Save zk ->
+                EditSensor.Save s ->
                     ( { model | state = EditSensor emod login esstate }
                     , sendUIMsg model.location
                         login
-                        (UI.SaveSensor zk)
+                        (UI.SaveSensor s)
                     )
 
                 EditSensor.None ->
@@ -559,14 +571,14 @@ update msg model =
 
                 EditSensor.Cancel ->
                     ( { model
-                        | state = esstate Nothing
+                        | state = esstate Canceled
                       }
                     , Cmd.none
                     )
 
                 EditSensor.Delete id ->
                     ( { model
-                        | state = esstate Nothing
+                        | state = esstate (Deleted id)
                       }
                     , sendUIMsg model.location
                         login

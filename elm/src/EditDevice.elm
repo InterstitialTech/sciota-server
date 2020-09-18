@@ -1,4 +1,4 @@
-module EditDevice exposing (Command(..), Model, Msg(..), init, initNew, setId, setSensor, update, view)
+module EditDevice exposing (Command(..), Model, Msg(..), init, initNew, removeSensor, setId, setSensor, update, view)
 
 import Common
 import Data
@@ -130,6 +130,14 @@ setSensor sensor model =
     { model
         | esl =
             ESL.setSensor sensor model.esl
+    }
+
+
+removeSensor : Int -> Model -> Model
+removeSensor sensor model =
+    { model
+        | esl =
+            ESL.removeSensor sensor model.esl
     }
 
 
