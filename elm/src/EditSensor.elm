@@ -50,12 +50,12 @@ type Command
 view : Model -> Element Msg
 view model =
     E.column
-        [ E.width E.fill ]
+        [ E.width E.fill, E.padding 10, E.spacing 8 ]
         [ E.text "Edit Sensor"
-        , E.row [ E.width E.fill ]
+        , E.row [ E.width E.fill, E.spacing 8 ]
             [ EI.button Common.buttonStyle { onPress = Just SavePress, label = E.text "Ok" }
             , EI.button Common.buttonStyle { onPress = Just DonePress, label = E.text "Cancel" }
-            , EI.button Common.buttonStyle { onPress = Just DeletePress, label = E.text "Delete" }
+            , EI.button (Common.buttonStyle ++ [ E.alignRight ]) { onPress = Just DeletePress, label = E.text "Delete" }
             ]
         , EI.text []
             { onChange = OnNameChanged
