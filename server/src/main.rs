@@ -25,6 +25,7 @@ extern crate sciota_protocol;
 
 mod config;
 mod email;
+mod expression;
 mod interfaces;
 mod sqldata;
 mod util;
@@ -175,7 +176,6 @@ fn load_config() -> Config {
 }
 
 fn main() {
-
   match err_main() {
     Err(e) => println!("error: {:?}", e),
     Ok(_) => (),
