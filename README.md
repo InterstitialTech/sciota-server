@@ -1,5 +1,19 @@
 # sciota-server
 
+## TL;DR
+
+For apt-based Linux:
+
+```
+sudo apt-get install libsqlite3-dev openssl
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+cd server
+cargo build
+./target/debug/server
+```
+
+## Details
+
 How to build:
 
 For the server, there are two parts: the elm frontend and the rust backend.  
