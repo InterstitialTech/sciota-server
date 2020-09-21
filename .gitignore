@@ -1,3 +1,7 @@
 *.swp
 cli/Cargo.lock
 cli/target/
+cli/message.txt
+cli/message-pretty.txt
+server/target/
+server/sciota.db

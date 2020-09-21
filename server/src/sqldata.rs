@@ -123,12 +123,27 @@ pub fn get_single_value(conn: &Connection, name: &str) -> Result<Option<String>,
 }
 
 pub fn set_single_value(conn: &Connection, name: &str, value: &str) -> Result<(), Box<dyn Error>> {
-  conn.execute(
-    "INSERT INTO singlevalue (name, value) values (?1, ?2)
-        ON CONFLICT (name) DO UPDATE SET value = ?2 where name = ?1",
-    params![name, value],
-  )?;
-  Ok(())
+  match get_single_value(conn, name) {
+    Ok(None) => {
+      conn.execute(
+        "INSERT INTO singlevalue (name, value) values (?1, ?2)",
+        params![name, value],
+      )?;
+      Ok(())
+    }
+    Ok(Some(val)) => {
+      if val == value {
+        Ok(())
+      } else {
+        conn.execute(
+          "UPDATE singlevalue SET value = ?2 where name = ?1",
+          params![name, value],
+        )?;
+        Ok(())
+      }
+    }
+    Err(e) => Err(e),
+  }
 }
 
 pub fn now() -> Result<i64, Box<dyn Error>> {
