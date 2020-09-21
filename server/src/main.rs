@@ -175,7 +175,6 @@ fn load_config() -> Config {
 }
 
 fn main() {
-
   match err_main() {
     Err(e) => println!("error: {:?}", e),
     Ok(_) => (),
@@ -193,22 +192,29 @@ fn err_main() -> Result<(), Box<dyn Error>> {
     sqldata::dbinit(config.db.as_path())?;
   }
 
+  let staticF = Path::new("static").exists();
+
   println!("config: {:?}", config);
 
   // let sys = actix_rt::System::new("pdf-server");
 
   let c = web::Data::new(config.clone());
   HttpServer::new(move || {
-    App::new()
+    let mut app = App::new()
       .register_data(c.clone()) // <- create app with shared state
       // enable logger
       .wrap(middleware::Logger::default())
       //      .route("/", web::get().to(mainpage))
       .service(web::resource("/public").route(web::post().to(public)))
       .service(web::resource("/user").route(web::post().to(user)))
-      .service(web::resource(r"/register/{uid}/{key}").route(web::get().to(register)))
-      .service(actix_files::Files::new("/static/", "static/"))
-      .service(web::resource("/{tail:.*}").route(web::get().to(mainpage)))
+      .service(web::resource(r"/register/{uid}/{key}").route(web::get().to(register)));
+    if staticF {
+      app
+        .service(actix_files::Files::new("/static/", "static/"))
+        .service(web::resource("/{tail:.*}").route(web::get().to(mainpage)))
+    } else {
+      app
+    }
   })
   .bind(format!("{}:{}", config.ip, config.port))?
   .run()?;
