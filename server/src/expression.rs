@@ -14,7 +14,7 @@ pub enum At {
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
-pub enum ArithBinaryOp {
+pub enum ArithOp {
   Add,
   Subtract,
   Multiply,
@@ -33,10 +33,11 @@ pub enum Expression {
   Const(f64),
   Measurement { sensor: i64, at: At },
   MeasurementRange { sensor: i64, from: At, to: At },
-  Abo(ArithBinaryOp, Box<Expression>, Box<Expression>),
-  Bo(BoolOp, Box<Expression>, Box<Expression>),
+  Abo(ArithOp, Vec<Box<Expression>>),
+  Bo(BoolOp, Vec<Box<Expression>>),
 }
 
+#[derive(Deserialize, Serialize, Debug, Clone)]
 pub enum MeasureRequest {
   Single { sensor: i64, at: At },
   Range { sensor: i64, from: At, to: At },
@@ -54,17 +55,23 @@ pub fn eval_for_measure_requests(exp: &Expression) -> Vec<MeasureRequest> {
       from: from.clone(),
       to: to.clone(),
     }],
-    Expression::Abo(op, exp1, exp2) => {
-      let mut v = eval_for_measure_requests(exp2);
-      let mut v2 = eval_for_measure_requests(exp1);
-      v2.append(&mut v);
-      v2
+    Expression::Abo(op, exps) => {
+      let mut v = Vec::new();
+      for exp in exps {
+        let mut v2 = eval_for_measure_requests(exp);
+        v.append(&mut v2);
+      }
+      v
     }
-    Expression::Bo(op, exp1, exp2) => {
-      let mut v = eval_for_measure_requests(exp2);
-      let mut v2 = eval_for_measure_requests(exp1);
-      v2.append(&mut v);
-      v2
+    Expression::Bo(op, exps) => {
+      let mut v = Vec::new();
+      for exp in exps {
+        let mut v2 = eval_for_measure_requests(exp);
+        v.append(&mut v2);
+      }
+      v
     }
   }
 }
+
+pub struct MeasureStore {}
