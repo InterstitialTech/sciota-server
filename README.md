@@ -1,8 +1,8 @@
 # sciota-server
 
-## TL;DR
+## TL;DR build it:
 
-For apt-based Linux:
+### For apt-based Linux:
 
 ```
 sudo apt-get install libsqlite3-dev openssl
@@ -12,7 +12,23 @@ cargo build
 ./target/debug/server
 ```
 
-## Details
+### For nixos, or if you have nix installed on mac/debian/etc:
+
+Automatic build/run for elm:
+```
+cd elm/
+nix-shell
+./watch-build.sh
+```
+
+Automatic build/run for the server:
+```
+cd server/
+nix-shell
+./watchrun.sh
+```
+
+## Build Details
 
 How to build:
 
@@ -20,9 +36,9 @@ For the server, there are two parts: the elm frontend and the rust backend.
 
 **build tools**
 
-For elm, you'll need elm 0.19.1, which is most likely the version that is install via apt if you're on debian.  
+For elm, you'll need elm 0.19.1, which is most likely the version that is installed via apt if you're on debian.  
 
-For rust, standard rust+cargo will do.  rustc being the rust compiler, and cargo being the build tool that pulls in dependencies. Some projects depend on the nightly version of rust for new features, but this one does not.  Install rust/cargo with [rustup.sh](https://rustup.rs/), or maybe with apt if you prefer.
+For rust, standard rustc+cargo will do.  rustc being the rust compiler, and cargo being the build tool that pulls in dependencies. Some projects depend on the nightly version of rust for new features, but this one does not.  Install rust/cargo with [rustup.sh](https://rustup.rs/), or maybe with apt if you prefer.
 
 **basic build**
 
